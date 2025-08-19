@@ -1,0 +1,71 @@
+import CompactStandardLibrary;
+
+enum ESCROW_STATE { active, released, refunded }
+
+struct Escrow {
+    org: Bytes<32>,
+    contributor: ZswapCoinPublicKey,
+    fee_address: ZswapCoinPublicKey,
+    fee: Uint<64>,
+    state: ESCROW_STATE,
+    coin: CoinInfo,
+}
+
+export ledger last_escrow_id: Uint<32>;
+export ledger escrows: Map<Uint<32>, Escrow>;
+export ledger instance: Counter;
+
+constructor() {
+    instance.increment(1);
+}
+
+witness localSecretKey(): Bytes<32>;
+
+export circuit create(
+    contributor: ZswapCoinPublicKey,
+    fee_address: ZswapCoinPublicKey,
+    org: Bytes<32>,
+    fee: Uint<64>,
+    coin: CoinInfo,
+): Uint<32> {
+    receive(disclose(coin));
+    last_escrow_id = (last_escrow_id + 1) as Uint<32>;
+    escrows.insert(
+        disclose(last_escrow_id),
+        Escrow{
+            org: disclose(org),
+            fee_address: disclose(fee_address),
+            contributor: disclose(contributor),
+            fee: disclose(fee),
+            state: ESCROW_STATE.active,
+            coin: disclose(coin),
+        }
+    );
+    return last_escrow_id;
+}
+
+export circuit release(id: Uint<32>): [] {
+    const e = escrows.lookup(disclose(id));
+    assert(e.state == ESCROW_STATE.active, "Escrow not active");
+
+    // Construct recipient as Either<ZswapCoinPublicKey, ContractAddress>
+    const recipient = Either<ZswapCoinPublicKey, ContractAddress> {
+        is_left: true,
+        left: e.contributor,
+        right: default<ContractAddress>,
+    };
+
+    // Send the full coin value to the contributor
+    const result = sendImmediate(e.coin, recipient, e.coin.value);
+
+    // Update escrow state
+    const updated = Escrow {
+        org: e.org,
+        fee_address: e.fee_address,
+        contributor: e.contributor,
+        fee: e.fee,
+        state: ESCROW_STATE.released,
+        coin: e.coin,
+    };
+    escrows.insert(disclose(id), updated);
+}
