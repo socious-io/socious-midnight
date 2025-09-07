@@ -13,6 +13,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This is how we type an empty object.
+// Witness providers for the escrow contract
+// The current escrow contract doesn't require witnesses in the generated code
+// This is a placeholder for future witness implementations
 
 export const witnesses = {};

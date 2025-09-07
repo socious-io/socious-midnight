@@ -13,5 +13,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * as Escrow from "./managed/escrow/contract/index.cjs";
-export * from "./witnesses";
+// Export the contract and witnesses
+export { Contract } from "./managed/escrow/contract/index.cjs";
+export { witnesses } from "./witnesses.js";

@@ -1,0 +1,14 @@
+{
+  "contractAddress": "0200fd6f1be20339a699c7640343d1114c233322fd54181c0548a063bbf79384712d",
+  "transactionId": "00000000e8e2c91588742f69169c5b8c2896d22059d79e3ec81fa12c3ded4756647896a6",
+  "blockHeight": 1607604,
+  "walletAddress": "mn_shield-addr_test10p5tlytz2ec3x9ds4f8vqpprxg5v6apklt67zjht20c2jfkn9d9sxqzwaphvq928mqcupnt37vhhzqxak3fp9scrhypu3yq4z5403lsu6vp4w9es",
+  "network": "testnet",
+  "deployedAt": "2025-09-07T17:00:33.303Z",
+  "config": {
+    "indexer": "https://indexer.testnet-02.midnight.network/api/v1/graphql",
+    "indexerWS": "wss://indexer.testnet-02.midnight.network/api/v1/graphql/ws",
+    "node": "https://rpc.testnet-02.midnight.network",
+    "proofServer": "http://localhost:6300"
+  }
+}

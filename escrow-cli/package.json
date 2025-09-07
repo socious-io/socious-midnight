@@ -1,0 +1,44 @@
+{
+  "name": "@midnight-ntwrk/counter-cli",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "testnet-remote": "node --experimental-specifier-resolution=node --loader ts-node/esm src/testnet-remote.ts",
+    "testnet-remote-ps": "cp -r proof-server-testnet.yml ./dist/ && node --experimental-specifier-resolution=node --loader ts-node/esm src/testnet-remote-start-proof-server.ts",
+    "testnet-local": "node --experimental-specifier-resolution=node --loader ts-node/esm src/testnet-local.ts",
+    "standalone": "docker compose -f standalone.yml pull && node --experimental-specifier-resolution=node --loader ts-node/esm src/standalone.ts",
+    "deploy-testnet": "node --experimental-specifier-resolution=node --loader ts-node/esm src/deploy-testnet.ts",
+    "test-api": "docker compose -f standalone.yml pull && DEBUG='testcontainers' vitest run",
+    "test-against-testnet": "RUN_ENV_TESTS=true TEST_ENV=testnet TEST_WALLET_SEED=1dec0dd58fbe4d3206ef960aebff95a77e09dffbd19f3e9439d23fe6de4fcdd1 vitest run",
+    "build": "rm -rf dist && tsc --project tsconfig.build.json",
+    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start-testnet-remote": "npm run build && npm run testnet-remote",
+    "start-testnet-remote-ps": "npm run build && npm run testnet-remote-ps"
+  },
+  "dependencies": {
+    "@midnight-ntwrk/compact-runtime": "^0.8.1",
+    "@midnight-ntwrk/ledger": "latest",
+    "@midnight-ntwrk/midnight-js-contracts": "latest",
+    "@midnight-ntwrk/midnight-js-http-client-proof-provider": "latest",
+    "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "latest",
+    "@midnight-ntwrk/midnight-js-level-private-state-provider": "latest",
+    "@midnight-ntwrk/midnight-js-network-id": "latest",
+    "@midnight-ntwrk/midnight-js-node-zk-config-provider": "latest",
+    "@midnight-ntwrk/midnight-js-types": "latest",
+    "@midnight-ntwrk/midnight-js-utils": "latest",
+    "@midnight-ntwrk/wallet": "latest",
+    "@midnight-ntwrk/wallet-api": "latest",
+    "@midnight-ntwrk/zswap": "latest",
+    "dotenv": "^17.2.2",
+    "rxjs": "^7.8.1",
+    "socious-midnight": "file:../contract",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}

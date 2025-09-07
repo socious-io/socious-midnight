@@ -14,7 +14,7 @@
 // limitations under the License.
 
 {
-  "include": ["src/**/*.ts", "src/deploy.ts"],
+  "include": ["src/**/*.ts", "deploy.ts"],
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
