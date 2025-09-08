@@ -1,9 +1,9 @@
 ---
 name: Bug Report
 about: Describe this issue template's purpose here.
-title: ""
+title: ''
 labels: example-counter, public
-assignees: ""
+assignees: ''
 ---
 
 Bug Report: Provide detailed information about the issue, including steps to reproduce it, expected behavior, and actual behaviour, screenshots or any other relevant information

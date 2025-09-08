@@ -1,5 +1,5 @@
 {
-  "name": "socious-midnight",
+  "name": "@socious-midnight/contract",
   "version": "0.1.0",
   "license": "Apache-2.0",
   "private": true,
@@ -27,6 +27,8 @@
     "deploy:mainnet": "NETWORK=mainnet npm run deploy"
   },
   "dependencies": {
-    "@midnight-ntwrk/compact-runtime": "^0.8.1"
+    "@midnight-ntwrk/compact-runtime": "^0.8.1",
+    "pino": "^9.9.4",
+    "pino-pretty": "^13.1.1"
   }
 }

@@ -13,7 +13,7 @@ const { Transaction: ZswapTransaction } = require('@midnight-ntwrk/zswap');
 const { createBalancedTx } = require('@midnight-ntwrk/midnight-js-types');
 const Rx = require('rxjs');
 const fs = require('fs/promises');
-const crypto = require('crypto');
+const logger = require('./logger.cjs');
 
 // Import the compiled escrow contract
 const { Contract: EscrowContract } = require('../contract/src/managed/escrow/contract/index.cjs');
@@ -27,28 +27,22 @@ const TESTNET_CONFIG = {
   proofServer: 'http://localhost:6300', // Using local proof server
 };
 
-// Generate random seed for new wallet or use existing one
-function generateSeed() {
-  const bytes = crypto.randomBytes(32);
-  return bytes.toString('hex');
-}
-
 async function waitForFunds(wallet) {
-  console.log('Waiting for wallet to sync with testnet...');
+  logger.info('Waiting for wallet to sync with testnet...');
   return Rx.firstValueFrom(
     wallet.state().pipe(
       Rx.throttleTime(5_000),
       Rx.tap((state) => {
         const applyGap = state.syncProgress?.lag.applyGap ?? 0n;
         const sourceGap = state.syncProgress?.lag.sourceGap ?? 0n;
-        console.log(`Sync progress - Backend lag: ${sourceGap}, wallet lag: ${applyGap}`);
+        logger.info(`Sync progress - Backend lag: ${sourceGap}, wallet lag: ${applyGap}`);
       }),
       Rx.filter((state) => state.syncProgress?.synced === true),
       Rx.map((s) => s.balances[nativeToken()] ?? 0n),
       Rx.tap((balance) => {
         if (balance === 0n) {
-          console.log('Wallet synced but no funds detected.');
-          console.log('Please fund your wallet with testnet tokens.');
+          logger.warn('Wallet synced but no funds detected.');
+          logger.warn('Please fund your wallet with testnet tokens.');
         }
       }),
       Rx.filter((balance) => balance > 0n),
@@ -57,24 +51,23 @@ async function waitForFunds(wallet) {
 }
 
 async function main() {
-  console.log('========================================');
-  console.log('   Midnight Escrow Contract Deployment');
-  console.log('   Network: TESTNET');
-  console.log('========================================\n');
-  
-  console.log('Configuration:');
-  console.log('- Indexer:', TESTNET_CONFIG.indexer);
-  console.log('- Node:', TESTNET_CONFIG.node);  
-  console.log('- Proof Server:', TESTNET_CONFIG.proofServer);
-  console.log();
+  logger.info('========================================');
+  logger.info('   Midnight Escrow Contract Deployment');
+  logger.info('   Network: TESTNET');
+  logger.info('========================================');
+
+  logger.info('Configuration:');
+  logger.info(`- Indexer: ${TESTNET_CONFIG.indexer}`);
+  logger.info(`- Node: ${TESTNET_CONFIG.node}`);
+  logger.info(`- Proof Server: ${TESTNET_CONFIG.proofServer}`);
 
   try {
     // Use the provided wallet seed with existing tDUST
     const walletSeed = 'a7dff47c1eb77b2b5aa05a93f328940092f56a54d77a5027f91d7c6012249608';
-    console.log('Using wallet seed with existing tDUST balance');
-    
+    logger.info('Using wallet seed with existing tDUST balance');
+
     // Build wallet
-    console.log('\nBuilding wallet...');
+    logger.info('Building wallet...');
     const wallet = await WalletBuilder.buildFromSeed(
       TESTNET_CONFIG.indexer,
       TESTNET_CONFIG.indexerWS,
@@ -82,41 +75,39 @@ async function main() {
       TESTNET_CONFIG.node,
       walletSeed,
       getZswapNetworkId(),
-      'info'
+      'info',
     );
-    
+
     wallet.start();
-    
+
     const state = await Rx.firstValueFrom(wallet.state());
-    console.log('✓ Wallet created');
-    console.log('  Wallet address:', state.address);
-    console.log();
-    
+    logger.info('✓ Wallet created');
+    logger.info(`  Wallet address: ${state.address}`);
+
     // Check balance
     let balance = state.balances[nativeToken()] ?? 0n;
     if (balance === 0n) {
-      console.log('⚠️  Wallet has no funds!');
-      console.log('    Please fund your wallet with testnet tokens.');
-      console.log('    Wallet address:', state.address);
-      console.log('\n    You can request testnet tokens from:');
-      console.log('    https://discord.gg/midnightnetwork');
-      console.log('\n    Waiting for funds...');
-      
+      logger.warn('⚠️  Wallet has no funds!');
+      logger.warn('    Please fund your wallet with testnet tokens.');
+      logger.warn(`    Wallet address: ${state.address}`);
+      logger.warn('    You can request testnet tokens from:');
+      logger.warn('    https://discord.gg/midnightnetwork');
+      logger.warn('    Waiting for funds...');
+
       balance = await waitForFunds(wallet);
     }
-    
-    console.log('  Balance:', balance.toString(), 'tDUST');
-    console.log();
-    
+
+    logger.info(`  Balance: ${balance.toString()} tDUST`);
+
     // Create providers
-    console.log('Creating providers...');
+    logger.info('Creating providers...');
     const publicDataProvider = indexerPublicDataProvider(TESTNET_CONFIG.indexer, TESTNET_CONFIG.indexerWS);
     const zkConfigProvider = new NodeZkConfigProvider(TESTNET_CONFIG.node);
     const proofProvider = httpClientProofProvider(TESTNET_CONFIG.proofServer);
     const privateStateProvider = await levelPrivateStateProvider({
       privateStateStoreName: 'escrow-private-state-testnet',
     });
-    
+
     // Create wallet provider
     const walletProvider = {
       coinPublicKey: state.coinPublicKey,
@@ -135,7 +126,7 @@ async function main() {
         return wallet.submitTransaction(tx);
       },
     };
-    
+
     const providers = {
       publicDataProvider,
       zkConfigProvider,
@@ -144,72 +135,75 @@ async function main() {
       walletProvider,
       midnightProvider: walletProvider,
     };
-    
-    console.log('✓ Providers created\n');
-    
+
+    logger.info('✓ Providers created');
+
     // Deploy contract
-    console.log('Deploying contract to testnet...');
-    console.log('This may take several minutes while generating proofs...');
-    
+    logger.info('Deploying contract to testnet...');
+    logger.info('This may take several minutes while generating proofs...');
+
     const escrow = new EscrowContract(witnesses);
     const deployed = await deployContract(providers, {
       contract: escrow,
       privateStateId: 'escrow-private-state-testnet',
       initialPrivateState: {},
     });
-    
+
     const contractAddress = deployed.deployTxData.public.contractAddress;
     const txId = deployed.deployTxData.public.txId;
     const blockHeight = deployed.deployTxData.public.blockHeight;
-    
-    console.log('✓ Contract deployed!\n');
-    
-    console.log('========================================');
-    console.log('   DEPLOYMENT SUCCESSFUL');
-    console.log('========================================');
-    console.log('CONTRACT ADDRESS:', contractAddress);
-    console.log('Transaction ID:', txId);
-    console.log('Block Height:', blockHeight);
-    console.log('========================================\n');
-    
+
+    logger.info('✓ Contract deployed!');
+
+    logger.info('========================================');
+    logger.info('   DEPLOYMENT SUCCESSFUL');
+    logger.info('========================================');
+    logger.info(`CONTRACT ADDRESS: ${contractAddress}`);
+    logger.info(`Transaction ID: ${txId}`);
+    logger.info(`Block Height: ${blockHeight}`);
+    logger.info('========================================');
+
     // Save deployment info
     await fs.writeFile(
       './deployment-testnet.json',
-      JSON.stringify({
-        contractAddress,
-        transactionId: txId,
-        blockHeight,
-        walletAddress: state.address,
-        network: 'testnet',
-        deployedAt: new Date().toISOString(),
-        config: TESTNET_CONFIG,
-      }, null, 2)
+      JSON.stringify(
+        {
+          contractAddress,
+          transactionId: txId,
+          blockHeight,
+          walletAddress: state.address,
+          network: 'testnet',
+          deployedAt: new Date().toISOString(),
+          config: TESTNET_CONFIG,
+        },
+        null,
+        2,
+      ),
     );
-    console.log('Deployment info saved to deployment-testnet.json');
-    console.log('\nView your contract on the explorer:');
-    console.log(`https://explorer.testnet.midnight.network/contracts/${contractAddress}`);
-    
+    logger.info('Deployment info saved to deployment-testnet.json');
+    logger.info('View your contract on the explorer:');
+    logger.info(`https://explorer.testnet.midnight.network/contracts/${contractAddress}`);
+
     // Clean up
     await wallet.close();
-    
+
     process.exit(0);
-    
   } catch (error) {
-    console.error('\n❌ Deployment failed:', error);
+    logger.error(`❌ Deployment failed: ${error}`);
     if (error.message?.includes('ECONNREFUSED')) {
-      console.error('\n📝 Make sure the proof server is running:');
-      console.error('   It should be accessible at', TESTNET_CONFIG.proofServer);
+      logger.error('📝 Make sure the proof server is running:');
+      logger.error(`   It should be accessible at ${TESTNET_CONFIG.proofServer}`);
     }
     if (error.message?.includes('insufficient funds')) {
-      console.error('\n💰 Insufficient funds in wallet.');
-      console.error('   Request testnet tokens from https://discord.gg/midnightnetwork');
+      logger.error('💰 Insufficient funds in wallet.');
+      logger.error('   Request testnet tokens from https://discord.gg/midnightnetwork');
     }
     process.exit(1);
   }
 }
 
 // Run deployment
-main().catch(error => {
-  console.error('Fatal error:', error);
+main().catch((error) => {
+  logger.error(`Fatal error: ${error}`);
   process.exit(1);
 });

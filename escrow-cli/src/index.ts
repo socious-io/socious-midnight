@@ -6,18 +6,18 @@ import { NodeZkConfigProvider } from '@midnight-ntwrk/midnight-js-node-zk-config
 import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
 import { levelPrivateStateProvider } from '@midnight-ntwrk/midnight-js-level-private-state-provider';
 import { WalletBuilder } from '@midnight-ntwrk/wallet';
-import type { MidnightProviders } from '@midnight-ntwrk/midnight-js-types';
+// import type { MidnightProviders } from '@midnight-ntwrk/midnight-js-types';
+import logger from './logger.js';
 
 // Import the compiled escrow contract
 import {
   Contract as EscrowContract,
   type Ledger as EscrowLedger,
 } from '../../contract/src/managed/escrow/contract/index.cjs';
-import * as crypto from 'crypto';
 import * as fs from 'fs/promises';
 
 // Private state type - empty since contract has no witnesses
-export type EscrowPrivateState = {};
+export type EscrowPrivateState = Record<string, never>;
 
 // Helper to create wallet and providers
 export async function createWalletAndProviders(config: { indexer: string; node: string; proofServer: string }) {
@@ -61,7 +61,7 @@ export async function createWalletAndProviders(config: { indexer: string; node: 
 
 // Deploy function
 export async function deployEscrow(providers: any) {
-  console.log('Deploying Escrow contract...');
+  logger.info('Deploying Escrow contract...');
 
   // Create contract instance (no witnesses required)
   const escrow = new EscrowContract({});
@@ -73,7 +73,7 @@ export async function deployEscrow(providers: any) {
     initialPrivateState: {}, // Empty state since no witnesses
   });
 
-  console.log('Contract deployed successfully!');
+  logger.info('Contract deployed successfully!');
   return deployed;
 }
 
@@ -89,7 +89,7 @@ export function getContractState(ledger: EscrowLedger) {
 // Main deployment execution
 async function main() {
   // Use local standalone configuration
-  const TEST_MNEMONIC = 'test test test test test test test test test test test junk';
+  // const TEST_MNEMONIC = 'test test test test test test test test test test test junk'; // Reserved for future use
 
   const CONFIG = {
     indexer: process.env.INDEXER_URL || 'http://localhost:8088/api/v1',
@@ -97,22 +97,21 @@ async function main() {
     proofServer: process.env.PROOF_SERVER_URL || 'http://localhost:6300',
   };
 
-  console.log('========================================');
-  console.log('   Midnight Escrow Contract Deployment');
-  console.log('   Network: STANDALONE (LOCAL)');
-  console.log('========================================\n');
+  logger.info('========================================');
+  logger.info('   Midnight Escrow Contract Deployment');
+  logger.info('   Network: STANDALONE (LOCAL)');
+  logger.info('========================================\n');
 
-  console.log('Configuration:');
-  console.log('- Indexer:', CONFIG.indexer);
-  console.log('- Node:', CONFIG.node);
-  console.log('- Proof Server:', CONFIG.proofServer);
-  console.log();
+  logger.info('Configuration:');
+  logger.info(`- Indexer: ${CONFIG.indexer}`);
+  logger.info(`- Node: ${CONFIG.node}`);
+  logger.info(`- Proof Server: ${CONFIG.proofServer}`);
 
   try {
     // Create wallet and providers
-    console.log('Creating wallet and providers...');
+    logger.info('Creating wallet and providers...');
     const { wallet, providers } = await createWalletAndProviders(CONFIG);
-    console.log('✓ Wallet and providers created\n');
+    logger.info('✓ Wallet and providers created');
 
     const walletState = wallet.state();
     const walletAddress = await new Promise((resolve) => {
@@ -120,7 +119,7 @@ async function main() {
         resolve(state.address);
       });
     });
-    console.log('  Wallet address:', walletAddress);
+    logger.info(`  Wallet address: ${walletAddress}`);
 
     // Get balance
     try {
@@ -129,25 +128,24 @@ async function main() {
           resolve(state.balances);
         });
       });
-      console.log('  Balance:', balances);
-    } catch (e) {
-      console.log('  Balance: Unable to fetch (node may be initializing)');
+      logger.info(`  Balance: ${balances}`);
+    } catch {
+      logger.warn('  Balance: Unable to fetch (node may be initializing)');
     }
-    console.log();
 
     // Deploy contract
-    console.log('Deploying contract...');
-    console.log('This may take a moment while generating proofs...');
+    logger.info('Deploying contract...');
+    logger.info('This may take a moment while generating proofs...');
     const deployed = await deployEscrow(providers);
 
     const contractAddress = (deployed as any).deployedContractAddress || (deployed as any).contractAddress || 'unknown';
-    console.log('✓ Contract deployed!\n');
+    logger.info('✓ Contract deployed!');
 
-    console.log('========================================');
-    console.log('   DEPLOYMENT SUCCESSFUL');
-    console.log('========================================');
-    console.log('CONTRACT ADDRESS:', contractAddress);
-    console.log('========================================\n');
+    logger.info('========================================');
+    logger.info('   DEPLOYMENT SUCCESSFUL');
+    logger.info('========================================');
+    logger.info(`CONTRACT ADDRESS: ${contractAddress}`);
+    logger.info('========================================');
 
     // Save deployment info
     await fs.writeFile(
@@ -164,17 +162,17 @@ async function main() {
         2,
       ),
     );
-    console.log('Deployment info saved to deployment.json');
+    logger.info('Deployment info saved to deployment.json');
 
     // Clean up
     await wallet.close();
 
     return contractAddress;
   } catch (error: any) {
-    console.error('\n❌ Deployment failed:', error);
+    logger.error(`❌ Deployment failed: ${error.message}`);
     if (error.message?.includes('ECONNREFUSED')) {
-      console.error('\n📝 Make sure the Midnight node and indexer are running:');
-      console.error('   cd ../escrow-cli && docker compose -f standalone.yml up -d');
+      logger.error('📝 Make sure the Midnight node and indexer are running:');
+      logger.error('   cd ../escrow-cli && docker compose -f standalone.yml up -d');
     }
     process.exit(1);
   }
@@ -184,11 +182,11 @@ async function main() {
 if (require.main === module) {
   main()
     .then((address) => {
-      console.log('\n✅ CONTRACT ADDRESS:', address);
+      logger.info(`✅ CONTRACT ADDRESS: ${address}`);
       process.exit(0);
     })
     .catch((error) => {
-      console.error('Fatal error:', error);
+      logger.error(`Fatal error: ${error}`);
       process.exit(1);
     });
 }

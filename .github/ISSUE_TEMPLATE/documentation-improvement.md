@@ -1,9 +1,9 @@
 ---
 name: Documentation Improvement
 about: Describe this issue template's purpose here.
-title: ""
+title: ''
 labels: example-counter, public
-assignees: ""
+assignees: ''
 ---
 
 Documentation Improvement: Clearly describe the improvement requested for existing content and/or raise missing areas of documentation and provide details for what should be included.

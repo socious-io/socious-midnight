@@ -1,9 +1,9 @@
 ---
 name: Feature Request
 about: Describe this issue template's purpose here.
-title: ""
+title: ''
 labels: example-counter, public
-assignees: ""
+assignees: ''
 ---
 
 Feature Request: Clearly describe your feature, its benefits, and most important the expected outcome. This helps us analyze the proposed solution and develop alternatives

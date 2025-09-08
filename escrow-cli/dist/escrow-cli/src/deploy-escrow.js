@@ -1,5 +1,6 @@
 // Escrow Contract Deployment Script
 import { deployContract } from '@midnight-ntwrk/midnight-js-contracts';
+import logger from './logger.js';
 import { indexerPublicDataProvider } from '@midnight-ntwrk/midnight-js-indexer-public-data-provider';
 import { NodeZkConfigProvider } from '@midnight-ntwrk/midnight-js-node-zk-config-provider';
 import { httpClientProofProvider } from '@midnight-ntwrk/midnight-js-http-client-proof-provider';
@@ -26,33 +27,33 @@ async function waitForFunds(wallet) {
     return Rx.firstValueFrom(wallet.state().pipe(Rx.throttleTime(5_000), Rx.tap((state) => {
         const applyGap = state.syncProgress?.lag.applyGap ?? 0n;
         const sourceGap = state.syncProgress?.lag.sourceGap ?? 0n;
-        console.log(`Waiting for sync. Backend lag: ${sourceGap}, wallet lag: ${applyGap}`);
+        logger.info(`Waiting for sync. Backend lag: ${sourceGap}, wallet lag: ${applyGap}`);
     }), Rx.filter((state) => state.syncProgress?.synced === true), Rx.map((s) => s.balances[nativeToken()] ?? 0n), Rx.filter((balance) => balance > 0n)));
 }
 async function main() {
-    console.log('========================================');
-    console.log('   Midnight Escrow Contract Deployment');
-    console.log('   Network: STANDALONE (LOCAL)');
-    console.log('========================================\n');
-    console.log('Configuration:');
-    console.log('- Indexer:', CONFIG.indexer);
-    console.log('- Node:', CONFIG.node);
-    console.log('- Proof Server:', CONFIG.proofServer);
-    console.log();
+    logger.info('========================================');
+    logger.info('   Midnight Escrow Contract Deployment');
+    logger.info('   Network: STANDALONE (LOCAL)');
+    logger.info('========================================\n');
+    logger.info('Configuration:');
+    logger.info(`- Indexer: ${CONFIG.indexer}`);
+    logger.info(`- Node: ${CONFIG.node}`);
+    logger.info(`- Proof Server: ${CONFIG.proofServer}`);
+    logger.info('');
     try {
         // Build wallet with genesis seed (has initial funds in standalone)
-        console.log('Building wallet with genesis seed...');
+        logger.info('Building wallet with genesis seed...');
         const wallet = await WalletBuilder.buildFromSeed(CONFIG.indexer, CONFIG.indexerWS, CONFIG.proofServer, CONFIG.node, GENESIS_MINT_WALLET_SEED, getZswapNetworkId(), 'info');
         wallet.start();
         const state = await Rx.firstValueFrom(wallet.state());
-        console.log('✓ Wallet created');
-        console.log('  Wallet address:', state.address);
+        logger.info('✓ Wallet created');
+        logger.info(`  Wallet address: ${state.address}`);
         // Wait for funds
         const balance = await waitForFunds(wallet);
-        console.log('  Balance:', balance.toString());
-        console.log();
+        logger.info(`  Balance: ${balance.toString()}`);
+        logger.info('');
         // Create providers
-        console.log('Creating providers...');
+        logger.info('Creating providers...');
         const publicDataProvider = indexerPublicDataProvider(CONFIG.indexer, CONFIG.indexerWS);
         const zkConfigProvider = new NodeZkConfigProvider(CONFIG.node);
         const proofProvider = httpClientProofProvider(CONFIG.proofServer);
@@ -82,10 +83,10 @@ async function main() {
             walletProvider,
             midnightProvider: walletProvider,
         };
-        console.log('✓ Providers created\n');
+        logger.info('✓ Providers created\n');
         // Deploy contract
-        console.log('Deploying contract...');
-        console.log('This may take a moment while generating proofs...');
+        logger.info('Deploying contract...');
+        logger.info('This may take a moment while generating proofs...');
         const escrow = new Contract(witnesses);
         const deployed = await deployContract(providers, {
             contract: escrow,
@@ -93,12 +94,12 @@ async function main() {
             initialPrivateState: {},
         });
         const contractAddress = deployed.deployTxData.public.contractAddress;
-        console.log('✓ Contract deployed!\n');
-        console.log('========================================');
-        console.log('   DEPLOYMENT SUCCESSFUL');
-        console.log('========================================');
-        console.log('CONTRACT ADDRESS:', contractAddress);
-        console.log('========================================\n');
+        logger.info('✓ Contract deployed!\n');
+        logger.info('========================================');
+        logger.info('   DEPLOYMENT SUCCESSFUL');
+        logger.info('========================================');
+        logger.info(`CONTRACT ADDRESS: ${contractAddress}`);
+        logger.info('========================================\n');
         // Save deployment info
         await fs.writeFile('./deployment.json', JSON.stringify({
             contractAddress,
@@ -107,23 +108,23 @@ async function main() {
             deployedAt: new Date().toISOString(),
             config: CONFIG,
         }, null, 2));
-        console.log('Deployment info saved to deployment.json');
+        logger.info('Deployment info saved to deployment.json');
         // Clean up
         await wallet.close();
         process.exit(0);
     }
     catch (error) {
-        console.error('\n❌ Deployment failed:', error);
+        logger.error(`\n❌ Deployment failed: ${error}`);
         if (error.message?.includes('ECONNREFUSED')) {
-            console.error('\n📝 Make sure the Midnight node and indexer are running:');
-            console.error('   docker compose -f standalone.yml up -d');
+            logger.error('\n📝 Make sure the Midnight node and indexer are running:');
+            logger.error('   docker compose -f standalone.yml up -d');
         }
         process.exit(1);
     }
 }
 // Run deployment
 main().catch((error) => {
-    console.error('Fatal error:', error);
+    logger.error(`Fatal error: ${error}`);
     process.exit(1);
 });
 //# sourceMappingURL=deploy-escrow.js.map

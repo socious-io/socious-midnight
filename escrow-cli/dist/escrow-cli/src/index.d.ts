@@ -1,6 +1,6 @@
 import { NodeZkConfigProvider } from '@midnight-ntwrk/midnight-js-node-zk-config-provider';
 import { Contract as EscrowContract, type Ledger as EscrowLedger } from '../../contract/src/managed/escrow/contract/index.cjs';
-export type EscrowPrivateState = {};
+export type EscrowPrivateState = Record<string, never>;
 export declare function createWalletAndProviders(config: {
     indexer: string;
     node: string;

@@ -46,10 +46,10 @@ async function main() {
   console.log('   Midnight Escrow Contract Deployment');
   console.log('   Network: STANDALONE (LOCAL)');
   console.log('========================================\n');
-  
+
   console.log('Configuration:');
   console.log('- Indexer:', CONFIG.indexer);
-  console.log('- Node:', CONFIG.node);  
+  console.log('- Node:', CONFIG.node);
   console.log('- Proof Server:', CONFIG.proofServer);
   console.log();
 
@@ -63,20 +63,20 @@ async function main() {
       CONFIG.node,
       GENESIS_MINT_WALLET_SEED,
       getZswapNetworkId(),
-      'info'
+      'info',
     );
-    
+
     wallet.start();
-    
+
     const state = await Rx.firstValueFrom(wallet.state());
     console.log('✓ Wallet created');
     console.log('  Wallet address:', state.address);
-    
+
     // Wait for funds
     const balance = await waitForFunds(wallet);
     console.log('  Balance:', balance);
     console.log();
-    
+
     // Create providers
     console.log('Creating providers...');
     const publicDataProvider = indexerPublicDataProvider(CONFIG.indexer, CONFIG.indexerWS);
@@ -85,12 +85,12 @@ async function main() {
     const privateStateProvider = await levelPrivateStateProvider({
       privateStateStoreName: 'escrow-private-state',
     });
-    
+
     // Create wallet provider
     const { Transaction: ZswapTransaction } = require('@midnight-ntwrk/zswap');
     const { Transaction } = require('@midnight-ntwrk/ledger');
     const { createBalancedTx } = require('@midnight-ntwrk/midnight-js-types');
-    
+
     const walletProvider = {
       coinPublicKey: state.coinPublicKey,
       encryptionPublicKey: state.encryptionPublicKey,
@@ -108,7 +108,7 @@ async function main() {
         return wallet.submitTransaction(tx);
       },
     };
-    
+
     const providers = {
       publicDataProvider,
       zkConfigProvider,
@@ -117,47 +117,50 @@ async function main() {
       walletProvider,
       midnightProvider: walletProvider,
     };
-    
+
     console.log('✓ Providers created\n');
-    
+
     // Deploy contract
     console.log('Deploying contract...');
     console.log('This may take a moment while generating proofs...');
-    
+
     const escrow = new EscrowContract(witnesses);
     const deployed = await deployContract(providers, {
       contract: escrow,
       privateStateId: 'escrow-private-state',
       initialPrivateState: {},
     });
-    
+
     const contractAddress = deployed.deployTxData.public.contractAddress;
     console.log('✓ Contract deployed!\n');
-    
+
     console.log('========================================');
     console.log('   DEPLOYMENT SUCCESSFUL');
     console.log('========================================');
     console.log('CONTRACT ADDRESS:', contractAddress);
     console.log('========================================\n');
-    
+
     // Save deployment info
     await fs.writeFile(
       './deployment.json',
-      JSON.stringify({
-        contractAddress,
-        walletAddress: state.address,
-        network: 'standalone',
-        deployedAt: new Date().toISOString(),
-        config: CONFIG,
-      }, null, 2)
+      JSON.stringify(
+        {
+          contractAddress,
+          walletAddress: state.address,
+          network: 'standalone',
+          deployedAt: new Date().toISOString(),
+          config: CONFIG,
+        },
+        null,
+        2,
+      ),
     );
     console.log('Deployment info saved to deployment.json');
-    
+
     // Clean up
     await wallet.close();
-    
+
     process.exit(0);
-    
   } catch (error) {
     console.error('\n❌ Deployment failed:', error);
     if (error.message?.includes('ECONNREFUSED')) {
@@ -169,7 +172,7 @@ async function main() {
 }
 
 // Run deployment
-main().catch(error => {
+main().catch((error) => {
   console.error('Fatal error:', error);
   process.exit(1);
 });

@@ -3,14 +3,17 @@
 ## CRITICAL UPDATE: Deployment Process (2025-09-03)
 
 ### Correct Deployment Pattern from escrow-cli
+
 The project includes an `escrow-cli` directory with the proper deployment pattern. Use this instead of creating new deployment scripts.
 
 ### Key Files for Deployment:
+
 1. **`/escrow-cli/src/index.ts`** - Contains the correct deployment pattern
 2. **`/escrow-cli/standalone.yml`** - Docker compose for local development
 3. **`/escrow-cli/package.json`** - Has scripts for testnet and standalone deployment
 
 ### Deployment Dependencies (from escrow-cli):
+
 ```typescript
 import { deployContract } from '@midnight-ntwrk/midnight-js-contracts';
 import type { MidnightProviders } from '@midnight-ntwrk/midnight-js-types';
@@ -18,12 +21,15 @@ import type { WitnessContext } from '@midnight-ntwrk/compact-runtime';
 ```
 
 ### Infrastructure Setup:
+
 For local development, use Docker Compose with:
+
 - **Proof Server**: `midnightnetwork/proof-server:4.0.0` (port 6300)
 - **Indexer**: `midnightntwrk/indexer-standalone:2.1.1` (port 8088)
 - **Node**: `midnightnetwork/midnight-node:0.12.0` (port 9944)
 
 ### Deployment Commands (from escrow-cli):
+
 ```bash
 # First, compile the contract
 cd contract
@@ -51,14 +57,15 @@ npm run testnet-remote  # For testnet deployment
 ```
 
 ### Important Notes:
+
 1. The escrow contract compiles successfully with Maps and proper types
 2. The contract doesn't require witness functions (localSecretKey was removed)
 3. Use escrow-cli pattern for deployment, not the contract/src/deploy.ts
 4. Make sure Docker is running for standalone deployment
-5. **TESTNET STATUS (2025-09-07)**: 
+5. **TESTNET STATUS (2025-09-07)**:
    - Fixed endpoint URLs to match working example-counter format
    - Wallet balance confirmed: 999701357 tDUST
-   - Correct endpoints: 
+   - Correct endpoints:
      - Indexer: `https://indexer.testnet-02.midnight.network/api/v1/graphql`
      - WS: `wss://indexer.testnet-02.midnight.network/api/v1/graphql/ws`
      - Node: `https://rpc.testnet-02.midnight.network`
@@ -66,17 +73,20 @@ npm run testnet-remote  # For testnet deployment
 # Midnight Escrow Contract - Development Context
 
 ## Project Overview
+
 Transforming a simple counter contract into a multi-party escrow contract for the Midnight Network blockchain.
 
 ## Current Status
+
 - **Date**: 2025-09-07
 - **Stage**: Contract successfully deployed to testnet
-- **Latest**: 
+- **Latest**:
   - Contract deployed at: `020071b65c62afee02899fe65d5b8b775488968c4122db1926130b5685c73341108d`
   - Removed hardcoded wallet seeds - now uses environment variables
   - Added .env support for secure configuration
 
 ## Requirements
+
 1. **Three-party escrow system**:
    - **Contributor**: Initiates escrow and can release funds to organization
    - **Organization**: Recipient of funds when escrow is completed
@@ -92,6 +102,7 @@ Transforming a simple counter contract into a multi-party escrow contract for th
 ## Technical Challenges Encountered
 
 ### 1. Compact Language Syntax Issues
+
 - **Problem**: Documentation at https://docs.midnight.network/develop/reference/compact/ not loading properly
 - **Attempted type names**: `Unsigned<16>`, `Uint<16>` - both incorrect
 - **Counter type**: Doesn't have `.value()` method as expected
@@ -100,28 +111,36 @@ Transforming a simple counter contract into a multi-party escrow contract for th
 ### 2. Current Contract Structure Attempts
 
 #### Attempt 1: Map-based approach (FAILED)
+
 ```compact
 export ledger escrows: Map<Unsigned<16>, EscrowData>;
 ```
+
 - Maps aren't supported with this syntax in Compact
 
 #### Attempt 2: Single escrow with Counter state (FAILED)
+
 ```compact
 export ledger state: Counter; // Using Counter to track state
 assert(state.value() == 1, "Escrow is not active");
 ```
+
 - Counter doesn't have `.value()` method
 
 #### Attempt 3: Boolean flags approach (IN PROGRESS)
+
 ```compact
 export ledger isActive: Boolean;
 export ledger isReleased: Boolean;
 export ledger isRefunded: Boolean;
 ```
+
 - This might work but limits to single active escrow
 
 ## Known Working Syntax
+
 From the counter example:
+
 ```compact
 pragma language_version >= 0.16 && <= 0.17;
 import CompactStandardLibrary;
@@ -134,12 +153,14 @@ export circuit increment(): [] {
 ```
 
 ## Key Learnings
+
 1. **Ledger variables**: Simple types like `Counter`, `Bytes<32>`, `Boolean`, `Field`
 2. **Counter operations**: `.increment(n)`, `.decrement(n)`, `.reset()`
 3. **Circuits**: Don't use type annotations in parameters like traditional languages
 4. **Assertions**: Use `assert(condition, "error message")`
 
 ## Files Modified
+
 1. `/contract/src/escrow.compact` - Main contract (needs fixing)
 2. `/contract/src/witnesses.ts` - TypeScript interfaces
 3. `/contract/src/index.ts` - Updated exports
@@ -148,6 +169,7 @@ export circuit increment(): [] {
 6. `/contract/src/test/escrow.test.ts` - Test suite
 
 ## Next Steps
+
 1. **Research proper Compact syntax**:
    - Find working examples of multi-item storage
    - Understand how to handle multiple concurrent escrows
@@ -158,7 +180,8 @@ export circuit increment(): [] {
    - Implement escrow queue system
    - Use external indexing with escrow IDs
 
-3. **Compilation command**: 
+3. **Compilation command**:
+
    ```bash
    cd contract && npm run compact
    ```
@@ -170,23 +193,28 @@ export circuit increment(): [] {
    ```
 
 ## Alternative Approach Consideration
+
 Since Compact doesn't easily support complex data structures, consider:
+
 1. **Single Active Escrow Model**: Only one escrow can be active at a time
 2. **Escrow ID System**: Each escrow gets unique ID, store current active ID
 3. **External State Management**: Use private state for complex mappings
 
 ## Resources Needed
+
 - Working Compact language examples with complex state
 - Documentation on Map/Array usage in Compact
 - Examples of multi-user contracts in Midnight
 
 ## Error Messages to Resolve
+
 ```
 Exception: escrow.compact line 30 char 15:
   operation value undefined for ledger field type Counter
 ```
 
 ## Commands for Testing
+
 ```bash
 # Compile contract
 cd contract && npm run compact
@@ -202,6 +230,7 @@ npm run compact && npm run build && npm run test
 ```
 
 ## Notes for Next Session
+
 - The contract needs to support multiple users simultaneously
 - Current simplified approach with boolean flags only supports one escrow at a time
 - Need to find Midnight Compact examples that handle multiple entities

@@ -1,36 +1,36 @@
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
     labels:
       - 'dependencies'
       - 'github-actions'
 
-  - package-ecosystem: "npm"
-    directory: "/"
+  - package-ecosystem: 'npm'
+    directory: '/'
     schedule:
-      interval: "daily"
+      interval: 'daily'
     open-pull-requests-limit: 30
     labels:
       - 'dependencies'
       - 'npm'
     versioning-strategy: auto
-      
-  - package-ecosystem: "npm"
-    directory: "/contract"
+
+  - package-ecosystem: 'npm'
+    directory: '/contract'
     schedule:
-      interval: "daily"
+      interval: 'daily'
     labels:
       - 'dependencies'
       - 'npm'
       - 'contract'
 
-  - package-ecosystem: "npm"
-    directory: "/counter-cli"
+  - package-ecosystem: 'npm'
+    directory: '/counter-cli'
     schedule:
-      interval: "daily"
+      interval: 'daily'
     labels:
       - 'dependencies'
       - 'npm'

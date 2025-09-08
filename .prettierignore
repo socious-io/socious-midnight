@@ -1,0 +1,16 @@
+node_modules/
+dist/
+build/
+coverage/
+*.min.js
+*.min.css
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.git/
+.vscode/
+.idea/
+*.log
+.DS_Store
+contract/src/managed/
+*.compact
