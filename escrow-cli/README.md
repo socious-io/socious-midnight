@@ -60,11 +60,11 @@ The CLI is configured to use Midnight testnet-02:
 - Indexer: https://indexer.testnet-02.midnight.network/api/v1/graphql
 - WebSocket: wss://indexer.testnet-02.midnight.network/api/v1/graphql/ws
 - RPC Node: https://rpc.testnet-02.midnight.network
-- Proof Server: http://localhost:6300 (must be running locally)
+- Proof Server: https://midnight-proofserver.socious.io
 
 ## Prerequisites
 
-- Local proof server running on port 6300
+- Proof server (using https://midnight-proofserver.socious.io)
 - Wallet with tDUST tokens (get from Midnight Discord)
 - Node.js v18 or higher
 

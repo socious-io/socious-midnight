@@ -30,7 +30,7 @@ const TESTNET_CONFIG = {
   indexer: 'https://indexer.testnet-02.midnight.network/api/v1/graphql',
   indexerWS: 'wss://indexer.testnet-02.midnight.network/api/v1/graphql/ws',
   node: 'https://rpc.testnet-02.midnight.network',
-  proofServer: 'http://localhost:6300', // Using local proof server
+  proofServer: 'https://midnight-proofserver.socious.io',
 };
 
 // Generate random seed for new wallet or use existing one

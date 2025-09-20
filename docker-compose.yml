@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  postgres:
+    container_name: postgres_v2
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: indexer
+      POSTGRES_PASSWORD: indexerpassword
+      POSTGRES_DB: indexer
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  nats:
+    container_name: nats_v2
+    image: nats:2.10
+    restart: always
+    command: >
+      -js
+      --user indexer
+      --pass nats_password
+    ports:
+      - "4222:4222"
+
+  chain-indexer:
+    container_name: chain_indexer_v2
+    image: midnightntwrk/chain-indexer
+    depends_on:
+      - postgres
+      - nats
+    environment:
+      APP__APPLICATION__NETWORK_ID: TestNet
+      APP__INFRA__STORAGE__HOST: postgres
+      APP__INFRA__STORAGE__PORT: 5432
+      APP__INFRA__STORAGE__DBNAME: indexer
+      APP__INFRA__STORAGE__USER: indexer
+      APP__INFRA__STORAGE__PASSWORD: indexerpassword
+      APP__INFRA__NODE__URL: wss://rpc.testnet-02.midnight.network
+      APP__INFRA__PUB_SUB__URL: nats://nats:4222
+      APP__INFRA__PUB_SUB__USERNAME: indexer
+      APP__INFRA__PUB_SUB__PASSWORD: nats_password
+      APP__INFRA__LEDGER_STATE_STORAGE__URL: nats://nats:4222
+      APP__INFRA__LEDGER_STATE_STORAGE__USERNAME: indexer
+      APP__INFRA__LEDGER_STATE_STORAGE__PASSWORD: nats_password
+      APP__INFRA__ZSWAP_STATE_STORAGE__URL: nats://nats:4222
+      APP__INFRA__ZSWAP_STATE_STORAGE__USERNAME: indexer
+      APP__INFRA__ZSWAP_STATE_STORAGE__PASSWORD: nats_password
+
+  indexer-api:
+    container_name: indexer_api_v2
+    image: midnightntwrk/indexer-api
+    depends_on:
+      - postgres
+      - chain-indexer
+      - nats
+    environment:
+      APP__APPLICATION__NETWORK_ID: TestNet
+      APP__INFRA__STORAGE__HOST: postgres
+      APP__INFRA__STORAGE__PORT: 5432
+      APP__INFRA__STORAGE__DBNAME: indexer
+      APP__INFRA__STORAGE__USER: indexer
+      APP__INFRA__STORAGE__PASSWORD: indexerpassword
+      APP__INFRA__API__PORT: 8088
+      APP__INFRA__SECRET: ${secret}
+      APP__INFRA__PUB_SUB__URL: nats://nats:4222
+      APP__INFRA__PUB_SUB__USERNAME: indexer
+      APP__INFRA__PUB_SUB__PASSWORD: nats_password
+      APP__INFRA__LEDGER_STATE_STORAGE__URL: nats://nats:4222
+      APP__INFRA__LEDGER_STATE_STORAGE__USERNAME: indexer
+      APP__INFRA__LEDGER_STATE_STORAGE__PASSWORD: nats_password
+      APP__INFRA__ZSWAP_STATE_STORAGE__URL: nats://nats:4222
+      APP__INFRA__ZSWAP_STATE_STORAGE__USERNAME: indexer
+      APP__INFRA__ZSWAP_STATE_STORAGE__PASSWORD: nats_password
+    ports:
+      - "8088:8088"
+
+  wallet-indexer:
+    container_name: wallet_indexer_v2
+    image: midnightntwrk/wallet-indexer
+    depends_on:
+      - postgres
+      - nats
+    environment:
+      APP__APPLICATION__NETWORK_ID: TestNet
+      APP__INFRA__STORAGE__HOST: postgres
+      APP__INFRA__STORAGE__PORT: 5432
+      APP__INFRA__STORAGE__DBNAME: indexer
+      APP__INFRA__STORAGE__USER: indexer
+      APP__INFRA__STORAGE__PASSWORD: indexerpassword
+      APP__INFRA__SECRET: ${secret}
+      APP__INFRA__PUB_SUB__URL: nats://nats:4222
+      APP__INFRA__PUB_SUB__USERNAME: indexer
+      APP__INFRA__PUB_SUB__PASSWORD: nats_password
+
+volumes:
+  pgdata:

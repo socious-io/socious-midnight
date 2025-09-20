@@ -94,7 +94,7 @@ async function main() {
   const CONFIG = {
     indexer: process.env.INDEXER_URL || 'http://localhost:8088/api/v1',
     node: process.env.NODE_URL || 'ws://localhost:9944',
-    proofServer: process.env.PROOF_SERVER_URL || 'http://localhost:6300',
+    proofServer: process.env.PROOF_SERVER_URL || 'https://midnight-proofserver.socious.io',
   };
 
   logger.info('========================================');

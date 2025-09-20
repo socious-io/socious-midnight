@@ -239,7 +239,7 @@ export const TESTNET_CONFIG: NetworkConfig = {
   indexer: 'https://indexer.testnet-02.midnight.network/api/v1/graphql',
   indexerWS: 'wss://indexer.testnet-02.midnight.network/api/v1/graphql/ws',
   node: 'https://rpc.testnet-02.midnight.network',
-  proofServer: 'http://localhost:6300', // Assumes local proof server
+  proofServer: 'https://midnight-proofserver.socious.io',
 };
 
 /**
