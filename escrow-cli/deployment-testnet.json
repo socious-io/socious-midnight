@@ -1,14 +1,14 @@
 {
-  "contractAddress": "02003bea1e4ab1e5a7876390e63b816e5b09b7f8aa0108eaa12c3c4bd48d812218ce",
-  "transactionId": "00000000ff4a59123ece172bd2b9b0a9110e09f48d5e8a048923b45cd26354a21b6cd46e",
-  "blockHeight": 1753783,
+  "contractAddress": "02004e737bde632d86e21c767d8406e5cb7429fedc7ae5d03d6e2d780ddd061df455",
+  "transactionId": "000000009e1d23fdfcff21178f3b05170ac7486653eea741f9cb75365707d017869ecf5f",
+  "blockHeight": 1929688,
   "walletAddress": "mn_shield-addr_test10p5tlytz2ec3x9ds4f8vqpprxg5v6apklt67zjht20c2jfkn9d9sxqzwaphvq928mqcupnt37vhhzqxak3fp9scrhypu3yq4z5403lsu6vp4w9es",
   "network": "testnet",
-  "deployedAt": "2025-09-18T05:50:51.636Z",
+  "deployedAt": "2025-09-30T20:13:33.596Z",
   "config": {
     "indexer": "https://indexer.testnet-02.midnight.network/api/v1/graphql",
     "indexerWS": "wss://indexer.testnet-02.midnight.network/api/v1/graphql/ws",
     "node": "https://rpc.testnet-02.midnight.network",
-    "proofServer": "http://localhost:6300"
+    "proofServer": "https://midnight-proofserver.socious.io"
   }
 }

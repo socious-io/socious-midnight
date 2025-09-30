@@ -245,4 +245,4 @@ export const TESTNET_CONFIG: NetworkConfig = {
 /**
  * Deployed contract address on testnet
  */
-export const TESTNET_CONTRACT_ADDRESS = '020071b65c62afee02899fe65d5b8b775488968c4122db1926130b5685c73341108d';
+export const TESTNET_CONTRACT_ADDRESS = '02004e737bde632d86e21c767d8406e5cb7429fedc7ae5d03d6e2d780ddd061df455';
