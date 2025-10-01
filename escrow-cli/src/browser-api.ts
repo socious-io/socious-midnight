@@ -290,6 +290,6 @@ export const TESTNET_CONFIG: NetworkConfig = {
 };
 
 /**
- * Deployed contract address on testnet
+ * Default deployed contract address on testnet (can be overridden)
  */
-export const TESTNET_CONTRACT_ADDRESS = '02005a47f7e241f8fab6f4029fba7d644072ee1f503f8b0aeafd931745df02c3aa3f';
+export const DEFAULT_TESTNET_CONTRACT_ADDRESS = '02005a47f7e241f8fab6f4029fba7d644072ee1f503f8b0aeafd931745df02c3aa3f';

@@ -13,7 +13,11 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:cypress": "cypress run",
+    "test:cypress:open": "cypress open",
+    "test:midnight": "cypress run --spec cypress/e2e/midnight-wallet-integration.cy.js",
+    "serve:test": "python3 -m http.server 3000"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
@@ -21,6 +25,7 @@
     "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.39.1",
     "@typescript-eslint/parser": "^8.38.0",
+    "cypress": "^15.3.0",
     "eslint": "^9.33.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
@@ -42,6 +47,7 @@
     "@midnight-ntwrk/wallet": "5.0.0",
     "@midnight-ntwrk/wallet-api": "5.0.0",
     "@midnight-ntwrk/zswap": "^4.0.0",
+    "node-fetch": "^3.3.2",
     "pino": "^9.9.0",
     "pino-pretty": "^13.1.1",
     "ws": "^8.18.3"

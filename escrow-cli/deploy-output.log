@@ -1,0 +1,42 @@
+[2025-10-01 20:36:14.027 +0330] [32mINFO[39m: [36m========================================[39m
+[2025-10-01 20:36:14.027 +0330] [32mINFO[39m: [36m   Midnight Escrow Contract Deployment[39m
+[2025-10-01 20:36:14.027 +0330] [32mINFO[39m: [36m   Network: TESTNET[39m
+[2025-10-01 20:36:14.027 +0330] [32mINFO[39m: [36m========================================
+[39m
+[2025-10-01 20:36:14.027 +0330] [32mINFO[39m: [36mConfiguration:[39m
+[2025-10-01 20:36:14.027 +0330] [32mINFO[39m: [36m- Indexer: https://indexer.testnet-02.midnight.network/api/v1/graphql[39m
+[2025-10-01 20:36:14.027 +0330] [32mINFO[39m: [36m- Node: https://rpc.testnet-02.midnight.network[39m
+[2025-10-01 20:36:14.027 +0330] [32mINFO[39m: [36m- Proof Server: https://midnight-proofserver.socious.io[39m
+[2025-10-01 20:36:14.027 +0330] [32mINFO[39m: 
+[2025-10-01 20:36:14.028 +0330] [32mINFO[39m: [36mUsing wallet seed from environment variable[39m
+[2025-10-01 20:36:14.028 +0330] [32mINFO[39m: [36m
+Building wallet...[39m
+[2025-10-01 20:36:14.050 +0330] [32mINFO[39m: [36mWaiting for wallet to sync with testnet...[39m
+[2025-10-01 20:36:20.873 +0330] [32mINFO[39m: [36m✓ Wallet synced and ready[39m
+[2025-10-01 20:36:20.873 +0330] [32mINFO[39m: [36m  Wallet address: mn_shield-addr_test10p5tlytz2ec3x9ds4f8vqpprxg5v6apklt67zjht20c2jfkn9d9sxqzwaphvq928mqcupnt37vhhzqxak3fp9scrhypu3yq4z5403lsu6vp4w9es[39m
+[2025-10-01 20:36:20.873 +0330] [32mINFO[39m: [36m
+Checking wallet balance...[39m
+[2025-10-01 20:36:20.873 +0330] [32mINFO[39m: [36m  Current balance: 2000663303 tDUST[39m
+[2025-10-01 20:36:20.873 +0330] [32mINFO[39m: [36m
+✓ Wallet has sufficient funds to proceed[39m
+[2025-10-01 20:36:20.873 +0330] [32mINFO[39m: [36m  Balance: 2000663303 tDUST[39m
+[2025-10-01 20:36:20.873 +0330] [32mINFO[39m: 
+[2025-10-01 20:36:20.873 +0330] [32mINFO[39m: [36mCreating providers...[39m
+[2025-10-01 20:36:20.875 +0330] [32mINFO[39m: [36m✓ Providers created
+[39m
+[2025-10-01 20:36:20.875 +0330] [32mINFO[39m: [36mDeploying contract to testnet...[39m
+[2025-10-01 20:36:20.875 +0330] [32mINFO[39m: [36mThis may take several minutes while generating proofs...[39m
+[2025-10-01 20:37:33.239 +0330] [32mINFO[39m: [36m✓ Contract deployed!
+[39m
+[2025-10-01 20:37:33.239 +0330] [32mINFO[39m: [36m========================================[39m
+[2025-10-01 20:37:33.239 +0330] [32mINFO[39m: [36m   DEPLOYMENT SUCCESSFUL[39m
+[2025-10-01 20:37:33.239 +0330] [32mINFO[39m: [36m========================================[39m
+[2025-10-01 20:37:33.239 +0330] [32mINFO[39m: [36mCONTRACT ADDRESS: 02005a47f7e241f8fab6f4029fba7d644072ee1f503f8b0aeafd931745df02c3aa3f[39m
+[2025-10-01 20:37:33.239 +0330] [32mINFO[39m: [36mTransaction ID: 000000008acf086ccf91b1196c9ddff243428e2ef550b464010794d68ff68cf307fcd784[39m
+[2025-10-01 20:37:33.239 +0330] [32mINFO[39m: [36mBlock Height: 1941863[39m
+[2025-10-01 20:37:33.239 +0330] [32mINFO[39m: [36m========================================
+[39m
+[2025-10-01 20:37:33.239 +0330] [32mINFO[39m: [36mDeployment info saved to deployment-testnet.json[39m
+[2025-10-01 20:37:33.239 +0330] [32mINFO[39m: [36m
+View your contract on the explorer:[39m
+[2025-10-01 20:37:33.239 +0330] [32mINFO[39m: [36mhttps://explorer.testnet.midnight.network/contracts/02005a47f7e241f8fab6f4029fba7d644072ee1f503f8b0aeafd931745df02c3aa3f[39m

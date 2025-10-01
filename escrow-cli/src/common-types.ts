@@ -6,14 +6,17 @@ export interface EscrowPrivateState {
   // Add any private state fields if needed
 }
 
+// @ts-ignore - Type constraint issue with Contract class
 export type EscrowCircuits = ImpureCircuitId<typeof Contract>;
 
 export const EscrowPrivateStateId = 'escrowPrivateState';
 
+// @ts-ignore - Type constraint issue with Contract class
 export type EscrowProviders = MidnightProviders<EscrowCircuits, typeof EscrowPrivateStateId, EscrowPrivateState>;
 
 export type EscrowContract = typeof Contract;
 
+// @ts-ignore - Type constraint issue with Contract class
 export type DeployedEscrowContract = DeployedContract<EscrowContract> | FoundContract<EscrowContract>;
 
 export interface EscrowData {

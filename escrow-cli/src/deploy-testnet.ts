@@ -192,23 +192,25 @@ async function main() {
     logger.info('========================================\n');
 
     // Save deployment info
+    const deploymentInfo = {
+      contractAddress,
+      transactionId: txId,
+      blockHeight,
+      walletAddress: state.address,
+      network: 'testnet',
+      deployedAt: new Date().toISOString(),
+      config: TESTNET_CONFIG,
+    };
+
     await fs.writeFile(
       './deployment-testnet.json',
-      JSON.stringify(
-        {
-          contractAddress,
-          transactionId: txId,
-          blockHeight,
-          walletAddress: state.address,
-          network: 'testnet',
-          deployedAt: new Date().toISOString(),
-          config: TESTNET_CONFIG,
-        },
-        null,
-        2,
-      ),
+      JSON.stringify(deploymentInfo, null, 2),
     );
     logger.info('Deployment info saved to deployment-testnet.json');
+
+    // Note: We only save metadata. The actual deployed contract object with callTx methods
+    // will be reconstructed in the browser using the contract instance + providers.
+    // This is sufficient for browser-side reconstruction without needing the indexer.
     logger.info('\nView your contract on the explorer:');
     logger.info(`https://explorer.testnet.midnight.network/contracts/${contractAddress}`);
 

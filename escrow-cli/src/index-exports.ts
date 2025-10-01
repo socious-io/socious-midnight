@@ -16,7 +16,7 @@ export {
   hexToPublicKey,
   createCoinInfo,
   TESTNET_CONFIG,
-  TESTNET_CONTRACT_ADDRESS,
+  DEFAULT_TESTNET_CONTRACT_ADDRESS,
   type EscrowProviders,
   type CreateEscrowParams,
   type NetworkConfig,

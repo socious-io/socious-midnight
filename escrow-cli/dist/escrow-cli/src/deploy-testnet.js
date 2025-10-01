@@ -27,7 +27,7 @@ const TESTNET_CONFIG = {
     indexer: 'https://indexer.testnet-02.midnight.network/api/v1/graphql',
     indexerWS: 'wss://indexer.testnet-02.midnight.network/api/v1/graphql/ws',
     node: 'https://rpc.testnet-02.midnight.network',
-    proofServer: 'http://localhost:6300', // Using local proof server
+    proofServer: 'https://midnight-proofserver.socious.io',
 };
 // Generate random seed for new wallet or use existing one
 function _generateSeed() {
@@ -147,7 +147,7 @@ async function main() {
         logger.info(`Block Height: ${blockHeight}`);
         logger.info('========================================\n');
         // Save deployment info
-        await fs.writeFile('./deployment-testnet.json', JSON.stringify({
+        const deploymentInfo = {
             contractAddress,
             transactionId: txId,
             blockHeight,
@@ -155,8 +155,12 @@ async function main() {
             network: 'testnet',
             deployedAt: new Date().toISOString(),
             config: TESTNET_CONFIG,
-        }, null, 2));
+        };
+        await fs.writeFile('./deployment-testnet.json', JSON.stringify(deploymentInfo, null, 2));
         logger.info('Deployment info saved to deployment-testnet.json');
+        // Note: We only save metadata. The actual deployed contract object with callTx methods
+        // will be reconstructed in the browser using the contract instance + providers.
+        // This is sufficient for browser-side reconstruction without needing the indexer.
         logger.info('\nView your contract on the explorer:');
         logger.info(`https://explorer.testnet.midnight.network/contracts/${contractAddress}`);
         // Clean up

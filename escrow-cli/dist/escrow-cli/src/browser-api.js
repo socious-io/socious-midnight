@@ -15,15 +15,22 @@ export class EscrowContractAPI {
     providers;
     contractAddress;
     witnesses;
-    constructor(providers, contractAddress, witnesses = {}) {
+    constructor(providers, contractAddress, witnesses = {}, deployedContract) {
         this.providers = providers;
         this.contractAddress = contractAddress;
         this.witnesses = witnesses;
+        if (deployedContract) {
+            this.contract = deployedContract;
+        }
     }
     /**
      * Connect to an existing deployed escrow contract
+     * Skip if already initialized with deployed contract
      */
     async connect() {
+        if (this.contract) {
+            return; // Already connected via constructor
+        }
         const escrowContractInstance = new Escrow.Contract(this.witnesses);
         this.contract = await findDeployedContract(this.providers, {
             contractAddress: this.contractAddress,
@@ -78,13 +85,14 @@ export class EscrowContractAPI {
         const escrows = [];
         // Iterate through the escrows Map
         for (const [id, escrowData] of ledgerState.escrows) {
+            const state = escrowData.state === 0 ? 'active' : escrowData.state === 1 ? 'released' : 'refunded';
             escrows.push({
                 id: Number(id),
                 org: escrowData.org,
                 contributor: escrowData.contributor,
                 feeAddress: escrowData.fee_address,
                 fee: escrowData.fee,
-                state: escrowData.state === 0 ? 'active' : escrowData.state === 1 ? 'released' : 'refunded',
+                state,
                 coin: escrowData.coin,
             });
         }
@@ -101,13 +109,14 @@ export class EscrowContractAPI {
             return null;
         }
         const escrowData = ledgerState.escrows.lookup(BigInt(escrowId));
+        const state = escrowData.state === 0 ? 'active' : escrowData.state === 1 ? 'released' : 'refunded';
         return {
             id: escrowId,
             org: escrowData.org,
             contributor: escrowData.contributor,
             feeAddress: escrowData.fee_address,
             fee: escrowData.fee,
-            state: escrowData.state === 0 ? 'active' : escrowData.state === 1 ? 'released' : 'refunded',
+            state,
             coin: escrowData.coin,
         };
     }
@@ -115,10 +124,27 @@ export class EscrowContractAPI {
 /**
  * Helper function to create an EscrowContractAPI instance
  * Use this after connecting wallet and configuring providers
+ *
+ * @param deployedContract - Optional: Pass a deployed contract object to skip indexer lookup
  */
-export async function createEscrowAPI(providers, contractAddress, witnesses = {}) {
-    const api = new EscrowContractAPI(providers, contractAddress, witnesses);
+export async function createEscrowAPI(providers, contractAddress, witnesses = {}, deployedContract) {
+    const api = new EscrowContractAPI(providers, contractAddress, witnesses, deployedContract);
     await api.connect();
+    return api;
+}
+/**
+ * Load deployed contract from saved file and create API instance
+ * This allows using the contract immediately without waiting for indexer
+ */
+export async function loadDeployedContract(providers, deployedContractPath, witnesses = {}) {
+    // Load the saved deployed contract data
+    const response = await fetch(deployedContractPath);
+    const deployedData = await response.json();
+    // Reconstruct the deployed contract object
+    const deployed = {
+        deployTxData: deployedData.deployTxData,
+    };
+    const api = new EscrowContractAPI(providers, deployedData.contractAddress, witnesses, deployed);
     return api;
 }
 /**
@@ -148,7 +174,9 @@ export function hexToPublicKey(hex) {
  */
 export function createCoinInfo(nonce, value, color) {
     return {
+        // @ts-ignore - Type mismatch with CoinInfo but works at runtime
         nonce: hexToBytes32(nonce),
+        // @ts-ignore - Type mismatch with CoinInfo but works at runtime
         color: color ? hexToBytes32(color) : new Uint8Array(32), // Default to zero bytes
         value,
     };
@@ -160,10 +188,10 @@ export const TESTNET_CONFIG = {
     indexer: 'https://indexer.testnet-02.midnight.network/api/v1/graphql',
     indexerWS: 'wss://indexer.testnet-02.midnight.network/api/v1/graphql/ws',
     node: 'https://rpc.testnet-02.midnight.network',
-    proofServer: 'http://localhost:6300', // Assumes local proof server
+    proofServer: 'https://midnight-proofserver.socious.io',
 };
 /**
- * Deployed contract address on testnet
+ * Default deployed contract address on testnet (can be overridden)
  */
-export const TESTNET_CONTRACT_ADDRESS = '020071b65c62afee02899fe65d5b8b775488968c4122db1926130b5685c73341108d';
+export const DEFAULT_TESTNET_CONTRACT_ADDRESS = '02005a47f7e241f8fab6f4029fba7d644072ee1f503f8b0aeafd931745df02c3aa3f';
 //# sourceMappingURL=browser-api.js.map

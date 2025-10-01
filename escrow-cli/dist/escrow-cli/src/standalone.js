@@ -21,7 +21,7 @@ const CONFIG = {
     indexer: 'http://localhost:8088/api/v1',
     indexerWS: 'ws://localhost:8088/api/v1/graphql/subscription',
     node: 'ws://localhost:9944',
-    proofServer: 'http://localhost:6300',
+    proofServer: 'https://midnight-proofserver.socious.io',
 };
 async function waitForFunds(wallet) {
     return Rx.firstValueFrom(wallet.state().pipe(Rx.throttleTime(5_000), Rx.tap((_state) => {

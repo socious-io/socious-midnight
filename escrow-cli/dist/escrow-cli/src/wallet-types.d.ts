@@ -35,7 +35,6 @@ declare global {
     interface Window {
         midnight?: {
             [key: string]: MidnightProvider;
-            mnLace?: MidnightProvider;
         };
     }
 }

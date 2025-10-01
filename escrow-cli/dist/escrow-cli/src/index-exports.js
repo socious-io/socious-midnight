@@ -8,7 +8,7 @@
  * ```
  */
 // Export the browser API
-export { EscrowContractAPI, createEscrowAPI, hexToBytes32, hexToPublicKey, createCoinInfo, TESTNET_CONFIG, TESTNET_CONTRACT_ADDRESS } from './browser-api';
+export { EscrowContractAPI, createEscrowAPI, hexToBytes32, hexToPublicKey, createCoinInfo, TESTNET_CONFIG, DEFAULT_TESTNET_CONTRACT_ADDRESS } from './browser-api';
 // Re-export the contract namespace for access to generated types
 export * as EscrowContract from '../../contract/src/managed/escrow/contract/index.cjs';
 // Export wallet types

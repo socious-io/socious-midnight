@@ -37,9 +37,10 @@ export declare class EscrowContractAPI {
     private providers;
     private contractAddress;
     private witnesses;
-    constructor(providers: EscrowProviders, contractAddress: string, witnesses?: any);
+    constructor(providers: EscrowProviders, contractAddress: string, witnesses?: any, deployedContract?: any);
     /**
      * Connect to an existing deployed escrow contract
+     * Skip if already initialized with deployed contract
      */
     connect(): Promise<void>;
     /**
@@ -82,8 +83,15 @@ export declare class EscrowContractAPI {
 /**
  * Helper function to create an EscrowContractAPI instance
  * Use this after connecting wallet and configuring providers
+ *
+ * @param deployedContract - Optional: Pass a deployed contract object to skip indexer lookup
  */
-export declare function createEscrowAPI(providers: EscrowProviders, contractAddress: string, witnesses?: any): Promise<EscrowContractAPI>;
+export declare function createEscrowAPI(providers: EscrowProviders, contractAddress: string, witnesses?: any, deployedContract?: any): Promise<EscrowContractAPI>;
+/**
+ * Load deployed contract from saved file and create API instance
+ * This allows using the contract immediately without waiting for indexer
+ */
+export declare function loadDeployedContract(providers: EscrowProviders, deployedContractPath: string, witnesses?: any): Promise<EscrowContractAPI>;
 /**
  * Helper to convert a hex string to Bytes32 (Uint8Array)
  */
@@ -103,6 +111,6 @@ export declare function createCoinInfo(nonce: string, value: bigint, color?: str
  */
 export declare const TESTNET_CONFIG: NetworkConfig;
 /**
- * Deployed contract address on testnet
+ * Default deployed contract address on testnet (can be overridden)
  */
-export declare const TESTNET_CONTRACT_ADDRESS = "020071b65c62afee02899fe65d5b8b775488968c4122db1926130b5685c73341108d";
+export declare const DEFAULT_TESTNET_CONTRACT_ADDRESS = "02005a47f7e241f8fab6f4029fba7d644072ee1f503f8b0aeafd931745df02c3aa3f";
