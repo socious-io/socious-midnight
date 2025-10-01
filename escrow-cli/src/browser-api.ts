@@ -49,16 +49,24 @@ export class EscrowContractAPI {
   private contractAddress: string;
   private witnesses: any;
 
-  constructor(providers: EscrowProviders, contractAddress: string, witnesses: any = {}) {
+  constructor(providers: EscrowProviders, contractAddress: string, witnesses: any = {}, deployedContract?: any) {
     this.providers = providers;
     this.contractAddress = contractAddress;
     this.witnesses = witnesses;
+    if (deployedContract) {
+      this.contract = deployedContract;
+    }
   }
 
   /**
    * Connect to an existing deployed escrow contract
+   * Skip if already initialized with deployed contract
    */
   async connect(): Promise<void> {
+    if (this.contract) {
+      return; // Already connected via constructor
+    }
+
     const escrowContractInstance = new Escrow.Contract(this.witnesses);
 
     this.contract = await findDeployedContract(this.providers, {
@@ -144,13 +152,16 @@ export class EscrowContractAPI {
 
     // Iterate through the escrows Map
     for (const [id, escrowData] of ledgerState.escrows) {
+      const state: 'active' | 'released' | 'refunded' =
+        escrowData.state === 0 ? 'active' : escrowData.state === 1 ? 'released' : 'refunded';
+
       escrows.push({
         id: Number(id),
         org: escrowData.org,
         contributor: escrowData.contributor,
         feeAddress: escrowData.fee_address,
         fee: escrowData.fee,
-        state: escrowData.state === 0 ? 'active' : escrowData.state === 1 ? 'released' : 'refunded',
+        state,
         coin: escrowData.coin,
       });
     }
@@ -171,13 +182,16 @@ export class EscrowContractAPI {
 
     const escrowData = ledgerState.escrows.lookup(BigInt(escrowId));
 
+    const state: 'active' | 'released' | 'refunded' =
+      escrowData.state === 0 ? 'active' : escrowData.state === 1 ? 'released' : 'refunded';
+
     return {
       id: escrowId,
       org: escrowData.org,
       contributor: escrowData.contributor,
       feeAddress: escrowData.fee_address,
       fee: escrowData.fee,
-      state: escrowData.state === 0 ? 'active' : escrowData.state === 1 ? 'released' : 'refunded',
+      state,
       coin: escrowData.coin,
     };
   }
@@ -186,14 +200,45 @@ export class EscrowContractAPI {
 /**
  * Helper function to create an EscrowContractAPI instance
  * Use this after connecting wallet and configuring providers
+ *
+ * @param deployedContract - Optional: Pass a deployed contract object to skip indexer lookup
  */
 export async function createEscrowAPI(
   providers: EscrowProviders,
   contractAddress: string,
+  witnesses: any = {},
+  deployedContract?: any
+): Promise<EscrowContractAPI> {
+  const api = new EscrowContractAPI(providers, contractAddress, witnesses, deployedContract);
+  await api.connect();
+  return api;
+}
+
+/**
+ * Load deployed contract from saved file and create API instance
+ * This allows using the contract immediately without waiting for indexer
+ */
+export async function loadDeployedContract(
+  providers: EscrowProviders,
+  deployedContractPath: string,
   witnesses: any = {}
 ): Promise<EscrowContractAPI> {
-  const api = new EscrowContractAPI(providers, contractAddress, witnesses);
-  await api.connect();
+  // Load the saved deployed contract data
+  const response = await fetch(deployedContractPath);
+  const deployedData: any = await response.json();
+
+  // Reconstruct the deployed contract object
+  const deployed = {
+    deployTxData: deployedData.deployTxData,
+  };
+
+  const api = new EscrowContractAPI(
+    providers,
+    deployedData.contractAddress as string,
+    witnesses,
+    deployed
+  );
+
   return api;
 }
 
@@ -226,7 +271,9 @@ export function hexToPublicKey(hex: string): { bytes: Uint8Array } {
  */
 export function createCoinInfo(nonce: string, value: bigint, color?: string): CoinInfo {
   return {
+    // @ts-ignore - Type mismatch with CoinInfo but works at runtime
     nonce: hexToBytes32(nonce),
+    // @ts-ignore - Type mismatch with CoinInfo but works at runtime
     color: color ? hexToBytes32(color) : new Uint8Array(32), // Default to zero bytes
     value,
   };
@@ -245,4 +292,4 @@ export const TESTNET_CONFIG: NetworkConfig = {
 /**
  * Deployed contract address on testnet
  */
-export const TESTNET_CONTRACT_ADDRESS = '02004e737bde632d86e21c767d8406e5cb7429fedc7ae5d03d6e2d780ddd061df455';
+export const TESTNET_CONTRACT_ADDRESS = '02005a47f7e241f8fab6f4029fba7d644072ee1f503f8b0aeafd931745df02c3aa3f';
