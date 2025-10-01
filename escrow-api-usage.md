@@ -11,7 +11,7 @@ import {
   TESTNET_CONFIG,
   hexToPublicKey,
   hexToBytes32,
-  createCoinInfo
+  createCoinInfo,
 } from '@socious-midnight/escrow-cli/browser';
 
 // Step 1: Connect Lace wallet
@@ -50,14 +50,14 @@ async function main() {
 
   // Create a new escrow
   const createParams = {
-    contributor: hexToPublicKey('0x' + '11'.repeat(32)),  // 32 bytes
-    feeAddress: hexToPublicKey('0x' + '22'.repeat(32)),   // 32 bytes
-    org: hexToBytes32('0x' + '33'.repeat(32)),            // 32 bytes
+    contributor: hexToPublicKey('0x' + '11'.repeat(32)), // 32 bytes
+    feeAddress: hexToPublicKey('0x' + '22'.repeat(32)), // 32 bytes
+    org: hexToBytes32('0x' + '33'.repeat(32)), // 32 bytes
     fee: 10n,
     coin: createCoinInfo(
-      '0x' + '44'.repeat(32),  // nonce
-      1000n                     // value in smallest units
-    )
+      '0x' + '44'.repeat(32), // nonce
+      1000n, // value in smallest units
+    ),
   };
 
   const { escrowId, txData } = await escrowAPI.createEscrow(createParams);

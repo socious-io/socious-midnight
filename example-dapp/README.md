@@ -46,6 +46,7 @@ npm run build
 ## Configuration
 
 The app is configured to use:
+
 - **Network**: Midnight Testnet
 - **Contract Address**: `020071b65c62afee02899fe65d5b8b775488968c4122db1926130b5685c73341108d`
 - **Indexer**: `https://indexer.testnet-02.midnight.network/api/v1/graphql`
@@ -77,7 +78,7 @@ import {
   createEscrowAPI,
   hexToPublicKey,
   hexToBytes32,
-  createCoinInfo
+  createCoinInfo,
 } from '../../escrow-cli/src/browser-api';
 ```
 

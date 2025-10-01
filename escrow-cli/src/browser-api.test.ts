@@ -13,21 +13,21 @@ vi.mock('@midnight-ntwrk/midnight-js-contracts', () => ({
         public: {
           txId: 'mock-tx-id-123',
           blockHeight: 1000n,
-        }
+        },
       }),
       release: vi.fn().mockResolvedValue({
         public: {
           txId: 'mock-tx-id-456',
           blockHeight: 1001n,
-        }
-      })
+        },
+      }),
     },
     deployTxData: {
       public: {
-        contractAddress: '020071b65c62afee02899fe65d5b8b775488968c4122db1926130b5685c73341108d'
-      }
-    }
-  })
+        contractAddress: '020071b65c62afee02899fe65d5b8b775488968c4122db1926130b5685c73341108d',
+      },
+    },
+  }),
 }));
 
 vi.mock('../../contract/src/managed/escrow/contract/index.cjs', () => ({
@@ -46,38 +46,44 @@ vi.mock('../../contract/src/managed/escrow/contract/index.cjs', () => ({
         coin: {
           nonce: new Uint8Array(32),
           color: new Uint8Array(32),
-          value: 1000n
-        }
+          value: 1000n,
+        },
       }),
       [Symbol.iterator]: function* () {
-        yield [1n, {
-          org: new Uint8Array(32),
-          contributor: { bytes: new Uint8Array(32) },
-          fee_address: { bytes: new Uint8Array(32) },
-          fee: 10n,
-          state: 0,
-          coin: {
-            nonce: new Uint8Array(32),
-            color: new Uint8Array(32),
-            value: 1000n
-          }
-        }];
-        yield [2n, {
-          org: new Uint8Array(32),
-          contributor: { bytes: new Uint8Array(32) },
-          fee_address: { bytes: new Uint8Array(32) },
-          fee: 20n,
-          state: 1, // released
-          coin: {
-            nonce: new Uint8Array(32),
-            color: new Uint8Array(32),
-            value: 2000n
-          }
-        }];
-      }
+        yield [
+          1n,
+          {
+            org: new Uint8Array(32),
+            contributor: { bytes: new Uint8Array(32) },
+            fee_address: { bytes: new Uint8Array(32) },
+            fee: 10n,
+            state: 0,
+            coin: {
+              nonce: new Uint8Array(32),
+              color: new Uint8Array(32),
+              value: 1000n,
+            },
+          },
+        ];
+        yield [
+          2n,
+          {
+            org: new Uint8Array(32),
+            contributor: { bytes: new Uint8Array(32) },
+            fee_address: { bytes: new Uint8Array(32) },
+            fee: 20n,
+            state: 1, // released
+            coin: {
+              nonce: new Uint8Array(32),
+              color: new Uint8Array(32),
+              value: 2000n,
+            },
+          },
+        ];
+      },
     },
-    instance: 1n
-  })
+    instance: 1n,
+  }),
 }));
 
 // Import the API after mocks are set up
@@ -88,7 +94,7 @@ import {
   hexToPublicKey,
   createCoinInfo,
   TESTNET_CONFIG,
-  TESTNET_CONTRACT_ADDRESS
+  TESTNET_CONTRACT_ADDRESS,
 } from './browser-api';
 import type { EscrowProviders, CreateEscrowParams } from './browser-api';
 
@@ -101,8 +107,8 @@ describe('EscrowContractAPI', () => {
     mockProviders = {
       publicDataProvider: {
         queryContractState: vi.fn().mockResolvedValue({
-          data: {} // Mock contract state data
-        })
+          data: {}, // Mock contract state data
+        }),
       },
       privateStateProvider: {},
       zkConfigProvider: {},
@@ -193,8 +199,8 @@ describe('EscrowContractAPI', () => {
         coin: {
           nonce: new Uint8Array(32),
           color: new Uint8Array(32),
-          value: 1000n
-        }
+          value: 1000n,
+        },
       };
 
       const result = await api.createEscrow(params);
@@ -290,8 +296,8 @@ describe('EscrowContractAPI', () => {
         coin: {
           nonce: new Uint8Array(32),
           color: new Uint8Array(32),
-          value: 1000n
-        }
+          value: 1000n,
+        },
       };
 
       await expect(connectedApi.createEscrow(params)).resolves.toBeDefined();

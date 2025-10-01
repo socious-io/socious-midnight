@@ -20,7 +20,7 @@ export {
   type EscrowProviders,
   type CreateEscrowParams,
   type NetworkConfig,
-  type EscrowPrivateState
+  type EscrowPrivateState,
 } from './browser-api';
 
 // Re-export the contract namespace for access to generated types
@@ -32,5 +32,5 @@ export {
   type MidnightState,
   type MidnightProvider,
   type MidnightWallet,
-  MIDNIGHT_DECIMAL_FACTOR
+  MIDNIGHT_DECIMAL_FACTOR,
 } from './wallet-types';

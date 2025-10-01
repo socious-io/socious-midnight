@@ -1,8 +1,8 @@
-import EscrowDApp from './EscrowDApp'
-import './App.css'
+import EscrowDApp from './EscrowDApp';
+import './App.css';
 
 function App() {
-  return <EscrowDApp />
+  return <EscrowDApp />;
 }
 
-export default App
+export default App;

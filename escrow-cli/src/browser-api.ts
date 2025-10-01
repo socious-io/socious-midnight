@@ -23,11 +23,11 @@ export type EscrowProviders = MidnightProviders<any, 'escrowPrivateState', Escro
 
 // Helper types for the contract parameters
 export interface CreateEscrowParams {
-  contributor: { bytes: Uint8Array };  // ZswapCoinPublicKey
-  feeAddress: { bytes: Uint8Array };   // ZswapCoinPublicKey
-  org: Uint8Array;                     // Bytes<32>
-  fee: bigint;                         // Uint<64>
-  coin: CoinInfo;                      // CoinInfo
+  contributor: { bytes: Uint8Array }; // ZswapCoinPublicKey
+  feeAddress: { bytes: Uint8Array }; // ZswapCoinPublicKey
+  org: Uint8Array; // Bytes<32>
+  fee: bigint; // Uint<64>
+  coin: CoinInfo; // CoinInfo
 }
 
 /**
@@ -94,7 +94,7 @@ export class EscrowContractAPI {
       params.feeAddress,
       params.org,
       params.fee,
-      params.coin
+      params.coin,
     );
 
     // The create circuit returns the escrow ID
@@ -123,7 +123,7 @@ export class EscrowContractAPI {
    */
   async getLedgerState(): Promise<any> {
     const contractState = await this.providers.publicDataProvider.queryContractState(
-      this.contractAddress as ContractAddress
+      this.contractAddress as ContractAddress,
     );
 
     if (!contractState) {
@@ -136,15 +136,17 @@ export class EscrowContractAPI {
   /**
    * Get all escrows from the contract
    */
-  async getAllEscrows(): Promise<Array<{
-    id: number;
-    org: Uint8Array;
-    contributor: { bytes: Uint8Array };
-    feeAddress: { bytes: Uint8Array };
-    fee: bigint;
-    state: 'active' | 'released' | 'refunded';
-    coin: CoinInfo;
-  }>> {
+  async getAllEscrows(): Promise<
+    Array<{
+      id: number;
+      org: Uint8Array;
+      contributor: { bytes: Uint8Array };
+      feeAddress: { bytes: Uint8Array };
+      fee: bigint;
+      state: 'active' | 'released' | 'refunded';
+      coin: CoinInfo;
+    }>
+  > {
     const ledgerState = await this.getLedgerState();
     if (!ledgerState) return [];
 
@@ -207,7 +209,7 @@ export async function createEscrowAPI(
   providers: EscrowProviders,
   contractAddress: string,
   witnesses: any = {},
-  deployedContract?: any
+  deployedContract?: any,
 ): Promise<EscrowContractAPI> {
   const api = new EscrowContractAPI(providers, contractAddress, witnesses, deployedContract);
   await api.connect();
@@ -221,7 +223,7 @@ export async function createEscrowAPI(
 export async function loadDeployedContract(
   providers: EscrowProviders,
   deployedContractPath: string,
-  witnesses: any = {}
+  witnesses: any = {},
 ): Promise<EscrowContractAPI> {
   // Load the saved deployed contract data
   const response = await fetch(deployedContractPath);
@@ -232,12 +234,7 @@ export async function loadDeployedContract(
     deployTxData: deployedData.deployTxData,
   };
 
-  const api = new EscrowContractAPI(
-    providers,
-    deployedData.contractAddress as string,
-    witnesses,
-    deployed
-  );
+  const api = new EscrowContractAPI(providers, deployedData.contractAddress as string, witnesses, deployed);
 
   return api;
 }

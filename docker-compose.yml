@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: indexerpassword
       POSTGRES_DB: indexer
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -23,7 +23,7 @@ services:
       --user indexer
       --pass nats_password
     ports:
-      - "4222:4222"
+      - '4222:4222'
 
   chain-indexer:
     container_name: chain_indexer_v2
@@ -75,7 +75,7 @@ services:
       APP__INFRA__ZSWAP_STATE_STORAGE__USERNAME: indexer
       APP__INFRA__ZSWAP_STATE_STORAGE__PASSWORD: nats_password
     ports:
-      - "8088:8088"
+      - '8088:8088'
 
   wallet-indexer:
     container_name: wallet_indexer_v2

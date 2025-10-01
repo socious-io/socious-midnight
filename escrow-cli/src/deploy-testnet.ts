@@ -202,10 +202,7 @@ async function main() {
       config: TESTNET_CONFIG,
     };
 
-    await fs.writeFile(
-      './deployment-testnet.json',
-      JSON.stringify(deploymentInfo, null, 2),
-    );
+    await fs.writeFile('./deployment-testnet.json', JSON.stringify(deploymentInfo, null, 2));
     logger.info('Deployment info saved to deployment-testnet.json');
 
     // Note: We only save metadata. The actual deployed contract object with callTx methods

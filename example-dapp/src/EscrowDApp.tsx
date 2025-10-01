@@ -12,12 +12,15 @@ import {
   hexToBytes32,
   createCoinInfo,
   TESTNET_CONFIG,
-  DEFAULT_TESTNET_CONTRACT_ADDRESS,
-  type CreateEscrowParams
+  type CreateEscrowParams,
 } from 'socious-midnight/escrow-cli/src/browser-api';
 
-// Get contract address from environment variable or use default
-const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || DEFAULT_TESTNET_CONTRACT_ADDRESS;
+// Get contract address from environment variable
+const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
+
+if (!CONTRACT_ADDRESS) {
+  throw new Error('VITE_CONTRACT_ADDRESS is not set in .env file');
+}
 
 interface Escrow {
   id: number;
@@ -75,7 +78,9 @@ export default function EscrowDApp() {
       // Browser-compatible ZK config provider
       const zkConfigProvider: ZKConfigProvider = {
         getZkConfig: async (contractAddress: string) => {
-          const response = await fetch(`${nodeUrl}/api/v1/zk-config/${contractAddress}`);
+          const response = await fetch(`${nodeUrl}/api/v1/zk-config/${contractAddress}`, {
+            method: 'POST',
+          });
           if (!response.ok) {
             throw new Error(`Failed to fetch ZK config: ${response.statusText}`);
           }
@@ -102,7 +107,7 @@ export default function EscrowDApp() {
       const api = await createEscrowAPI(
         providers as any,
         CONTRACT_ADDRESS,
-        {} // No witnesses required
+        {}, // No witnesses required
       );
 
       console.log('[API] Escrow API created successfully!');
@@ -154,16 +159,12 @@ export default function EscrowDApp() {
       // Prepare escrow parameters
       const params: CreateEscrowParams = {
         contributor: hexToPublicKey(contributorAddress),
-        feeAddress: feeAddress
-          ? hexToPublicKey(feeAddress)
-          : hexToPublicKey('0x' + '22'.repeat(32)), // Default fee address
-        org: orgId
-          ? hexToBytes32(orgId)
-          : hexToBytes32('0x' + '33'.repeat(32)), // Default org ID
+        feeAddress: feeAddress ? hexToPublicKey(feeAddress) : hexToPublicKey('0x' + '22'.repeat(32)), // Default fee address
+        org: orgId ? hexToBytes32(orgId) : hexToBytes32('0x' + '33'.repeat(32)), // Default org ID
         fee: BigInt(fee),
         coin: createCoinInfo(
           '0x' + '44'.repeat(32), // Random nonce - in production, use proper nonce
-          amount
+          amount,
         ),
       };
 
@@ -210,9 +211,12 @@ export default function EscrowDApp() {
 
   // Helper to convert Uint8Array to hex
   const bytesToHex = (bytes: Uint8Array): string => {
-    return '0x' + Array.from(bytes)
-      .map(b => b.toString(16).padStart(2, '0'))
-      .join('');
+    return (
+      '0x' +
+      Array.from(bytes)
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('')
+    );
   };
 
   return (
@@ -220,13 +224,15 @@ export default function EscrowDApp() {
       <h1>Midnight Escrow DApp</h1>
 
       {error && (
-        <div style={{
-          backgroundColor: '#fee',
-          color: '#c00',
-          padding: '10px',
-          borderRadius: '4px',
-          marginBottom: '20px'
-        }}>
+        <div
+          style={{
+            backgroundColor: '#fee',
+            color: '#c00',
+            padding: '10px',
+            borderRadius: '4px',
+            marginBottom: '20px',
+          }}
+        >
           {error}
         </div>
       )}
@@ -244,7 +250,7 @@ export default function EscrowDApp() {
               color: 'white',
               border: 'none',
               borderRadius: '4px',
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
           >
             {loading ? 'Connecting...' : 'Connect Lace Wallet'}
@@ -252,24 +258,28 @@ export default function EscrowDApp() {
         </div>
       ) : (
         <div>
-          <div style={{
-            backgroundColor: '#e7f3ff',
-            padding: '10px',
-            borderRadius: '4px',
-            marginBottom: '20px'
-          }}>
+          <div
+            style={{
+              backgroundColor: '#e7f3ff',
+              padding: '10px',
+              borderRadius: '4px',
+              marginBottom: '20px',
+            }}
+          >
             <strong>Connected:</strong> {walletAddress}
             <br />
             <strong>Contract:</strong> {CONTRACT_ADDRESS}
           </div>
 
           {/* Create Escrow Form */}
-          <div style={{
-            border: '1px solid #ddd',
-            padding: '20px',
-            borderRadius: '8px',
-            marginBottom: '30px'
-          }}>
+          <div
+            style={{
+              border: '1px solid #ddd',
+              padding: '20px',
+              borderRadius: '8px',
+              marginBottom: '30px',
+            }}
+          >
             <h2>Create New Escrow</h2>
             <form onSubmit={handleCreateEscrow}>
               <div style={{ marginBottom: '15px' }}>
@@ -287,7 +297,7 @@ export default function EscrowDApp() {
                     padding: '8px',
                     fontSize: '14px',
                     border: '1px solid #ccc',
-                    borderRadius: '4px'
+                    borderRadius: '4px',
                   }}
                 />
                 <small>Enter amount in smallest units (1 DUST = 1000000 smallest units)</small>
@@ -309,16 +319,14 @@ export default function EscrowDApp() {
                     fontSize: '14px',
                     fontFamily: 'monospace',
                     border: '1px solid #ccc',
-                    borderRadius: '4px'
+                    borderRadius: '4px',
                   }}
                 />
                 <small>32-byte address (64 hex characters)</small>
               </div>
 
               <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '5px' }}>
-                  Organization ID (optional)
-                </label>
+                <label style={{ display: 'block', marginBottom: '5px' }}>Organization ID (optional)</label>
                 <input
                   type="text"
                   value={orgId}
@@ -330,15 +338,13 @@ export default function EscrowDApp() {
                     fontSize: '14px',
                     fontFamily: 'monospace',
                     border: '1px solid #ccc',
-                    borderRadius: '4px'
+                    borderRadius: '4px',
                   }}
                 />
               </div>
 
               <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '5px' }}>
-                  Fee Address (optional)
-                </label>
+                <label style={{ display: 'block', marginBottom: '5px' }}>Fee Address (optional)</label>
                 <input
                   type="text"
                   value={feeAddress}
@@ -350,15 +356,13 @@ export default function EscrowDApp() {
                     fontSize: '14px',
                     fontFamily: 'monospace',
                     border: '1px solid #ccc',
-                    borderRadius: '4px'
+                    borderRadius: '4px',
                   }}
                 />
               </div>
 
               <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '5px' }}>
-                  Fee Amount
-                </label>
+                <label style={{ display: 'block', marginBottom: '5px' }}>Fee Amount</label>
                 <input
                   type="number"
                   value={fee}
@@ -368,7 +372,7 @@ export default function EscrowDApp() {
                     padding: '8px',
                     fontSize: '14px',
                     border: '1px solid #ccc',
-                    borderRadius: '4px'
+                    borderRadius: '4px',
                   }}
                 />
               </div>
@@ -384,7 +388,7 @@ export default function EscrowDApp() {
                   border: 'none',
                   borderRadius: '4px',
                   cursor: 'pointer',
-                  width: '100%'
+                  width: '100%',
                 }}
               >
                 {loading ? 'Creating...' : 'Create Escrow'}
@@ -406,16 +410,27 @@ export default function EscrowDApp() {
                       border: '1px solid #ddd',
                       padding: '15px',
                       borderRadius: '8px',
-                      backgroundColor: '#f9f9f9'
+                      backgroundColor: '#f9f9f9',
                     }}
                   >
                     <h3>Escrow #{escrow.id}</h3>
                     <div style={{ fontSize: '14px', lineHeight: '1.8' }}>
-                      <div><strong>Status:</strong> <span style={{
-                        color: escrow.state === 'active' ? 'green' : escrow.state === 'released' ? 'blue' : 'gray'
-                      }}>{escrow.state.toUpperCase()}</span></div>
-                      <div><strong>Amount:</strong> {escrow.coin.value.toString()} DUST</div>
-                      <div><strong>Fee:</strong> {escrow.fee.toString()}</div>
+                      <div>
+                        <strong>Status:</strong>{' '}
+                        <span
+                          style={{
+                            color: escrow.state === 'active' ? 'green' : escrow.state === 'released' ? 'blue' : 'gray',
+                          }}
+                        >
+                          {escrow.state.toUpperCase()}
+                        </span>
+                      </div>
+                      <div>
+                        <strong>Amount:</strong> {escrow.coin.value.toString()} DUST
+                      </div>
+                      <div>
+                        <strong>Fee:</strong> {escrow.fee.toString()}
+                      </div>
                       <div style={{ wordBreak: 'break-all' }}>
                         <strong>Contributor:</strong> {bytesToHex(escrow.contributor.bytes)}
                       </div>
@@ -434,7 +449,7 @@ export default function EscrowDApp() {
                             color: 'white',
                             border: 'none',
                             borderRadius: '4px',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
                           }}
                         >
                           Release Escrow
