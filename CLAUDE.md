@@ -78,12 +78,14 @@ Transforming a simple counter contract into a multi-party escrow contract for th
 
 ## Current Status
 
-- **Date**: 2025-09-07
-- **Stage**: Contract successfully deployed to testnet
+- **Date**: 2025-10-01
+- **Stage**: Contract deployed with working browser DApp example
 - **Latest**:
-  - Contract deployed at: `020071b65c62afee02899fe65d5b8b775488968c4122db1926130b5685c73341108d`
-  - Removed hardcoded wallet seeds - now uses environment variables
-  - Added .env support for secure configuration
+  - Contract deployed at: `02005a47f7e241f8fab6f4029fba7d644072ee1f503f8b0aeafd931745df02c3aa3f`
+  - Added example-dapp with React + Vite + Lace wallet integration
+  - Environment variable configuration for contract address
+  - Browser API with proper zkConfig POST request
+  - CLI test script confirms contract is indexed and working
 
 ## Requirements
 
@@ -229,9 +231,56 @@ npm run test
 npm run compact && npm run build && npm run test
 ```
 
-## Notes for Next Session
+## Browser DApp Setup
 
-- The contract needs to support multiple users simultaneously
-- Current simplified approach with boolean flags only supports one escrow at a time
-- Need to find Midnight Compact examples that handle multiple entities
-- Consider looking at other Midnight example projects for patterns
+The `example-dapp` directory contains a working React + Vite application for interacting with the escrow contract.
+
+### Quick Start:
+
+```bash
+cd example-dapp
+npm install
+cp .env.example .env  # Configure contract address
+npm run dev
+```
+
+### Configuration:
+
+Edit `.env` file:
+```
+VITE_CONTRACT_ADDRESS=02005a47f7e241f8fab6f4029fba7d644072ee1f503f8b0aeafd931745df02c3aa3f
+```
+
+### Key Features:
+
+- Lace wallet integration via `window.midnight.mnLace`
+- Environment-based contract configuration
+- zkConfig fetched via POST request (not GET)
+- Private state storage in browser IndexedDB
+- Create and release escrow operations
+- View all active escrows
+
+### Important Fix:
+
+The zkConfig provider MUST use POST request:
+```typescript
+const zkConfigProvider: ZKConfigProvider = {
+  getZkConfig: async (contractAddress: string) => {
+    const response = await fetch(`${nodeUrl}/api/v1/zk-config/${contractAddress}`, {
+      method: 'POST',  // REQUIRED - GET returns 405
+    });
+    return await response.json();
+  },
+};
+```
+
+## Testing Contract Connection
+
+Use the CLI test script to verify contract is indexed:
+
+```bash
+cd escrow-cli
+npx tsx src/test-join.ts
+```
+
+This should connect to the contract in ~1-2 seconds, proving the contract is properly indexed.
