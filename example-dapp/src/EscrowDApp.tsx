@@ -76,7 +76,7 @@ export default function EscrowDApp() {
       const publicDataProvider = indexerPublicDataProvider(indexerUrl, indexerWsUrl);
 
       // Browser-compatible ZK config provider
-      const zkConfigProvider: ZKConfigProvider = {
+      const zkConfigProvider = {
         getZkConfig: async (contractAddress: string) => {
           const response = await fetch(`${nodeUrl}/api/v1/zk-config/${contractAddress}`, {
             method: 'POST',
@@ -102,13 +102,30 @@ export default function EscrowDApp() {
       };
 
       console.log('[API] Creating escrow API...');
-      console.log('[API] This may take a minute to sync with indexer...');
+      console.log('[API] Contract address:', CONTRACT_ADDRESS);
 
-      const api = await createEscrowAPI(
-        providers as any,
-        CONTRACT_ADDRESS,
-        {}, // No witnesses required
-      );
+      // Create EscrowContractAPI directly without connect() - more efficient approach
+      console.log('[API] Creating EscrowContractAPI directly (no connect() needed)...');
+      console.log('[API] Methods like createEscrow(), releaseEscrow(), getAllEscrows() work directly');
+      
+      const { EscrowContractAPI } = await import('socious-midnight/escrow-cli/src/browser-api');
+      const api = new EscrowContractAPI(providers as any, CONTRACT_ADDRESS, {});
+      
+      console.log('[API] EscrowContractAPI created successfully!');
+      
+      // Test that publicDataProvider can access the contract
+      try {
+        const ledgerState = await api.getLedgerState();
+        console.log('[API] Contract access verified, ledger state:', ledgerState);
+        
+        if (ledgerState === null) {
+          console.log('[API] ✅ Contract is accessible but has no escrows yet (this is normal)');
+        } else {
+          console.log('[API] ✅ Contract has escrows:', ledgerState.escrows?.size || 0);
+        }
+      } catch (queryError) {
+        console.warn('[API] Contract query failed, but API is still functional:', queryError instanceof Error ? queryError.message : String(queryError));
+      }
 
       console.log('[API] Escrow API created successfully!');
       setEscrowAPI(api);

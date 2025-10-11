@@ -22,6 +22,9 @@ This is a React + Vite example application demonstrating how to integrate the Mi
 # From the example-dapp directory
 npm install
 
+# Copy environment variables
+cp .env.example .env
+
 # Run development server
 npm run dev
 
