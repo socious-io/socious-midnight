@@ -97,6 +97,17 @@ export declare function loadDeployedContract(providers: EscrowProviders, deploye
  */
 export declare function hexToBytes32(hex: string): Uint8Array;
 /**
+ * Helper to convert a Bech32m address (mn1...) or hex string to ZswapCoinPublicKey format
+ * Midnight uses Bech32m encoding with 'mn' prefix, NOT EVM-style hex addresses!
+ *
+ * @param addressOrHex - Midnight address in Bech32m format (e.g., mn1...) or hex string
+ * @returns ZswapCoinPublicKey object with bytes
+ */
+export declare function addressToPublicKey(addressOrHex: string): {
+    bytes: Uint8Array;
+};
+/**
+ * @deprecated Use addressToPublicKey instead - Midnight uses Bech32m addresses, not raw hex
  * Helper to convert a hex string to ZswapCoinPublicKey format
  */
 export declare function hexToPublicKey(hex: string): {

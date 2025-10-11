@@ -7,6 +7,8 @@ import { findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
 import type { MidnightProviders, FinalizedTxData } from '@midnight-ntwrk/midnight-js-types';
 import type { ContractAddress } from '@midnight-ntwrk/compact-runtime';
 import type { CoinInfo } from '@midnight-ntwrk/ledger';
+import { parseCoinPublicKeyToHex } from '@midnight-ntwrk/midnight-js-utils';
+import { getZswapNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 
 // Import the generated contract
 import * as Escrow from '../../contract/src/managed/escrow/contract/index.cjs';
@@ -257,6 +259,24 @@ export function hexToBytes32(hex: string): Uint8Array {
 }
 
 /**
+ * Helper to convert a Bech32m address (mn1...) or hex string to ZswapCoinPublicKey format
+ * Midnight uses Bech32m encoding with 'mn' prefix, NOT EVM-style hex addresses!
+ *
+ * @param addressOrHex - Midnight address in Bech32m format (e.g., mn1...) or hex string
+ * @returns ZswapCoinPublicKey object with bytes
+ */
+export function addressToPublicKey(addressOrHex: string): { bytes: Uint8Array } {
+  try {
+    // Parse using Midnight's utility that handles both Bech32m and hex
+    const hexString = parseCoinPublicKeyToHex(addressOrHex, getZswapNetworkId());
+    return { bytes: hexToBytes32(hexString) };
+  } catch (error) {
+    throw new Error(`Invalid Midnight address or hex: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
+ * @deprecated Use addressToPublicKey instead - Midnight uses Bech32m addresses, not raw hex
  * Helper to convert a hex string to ZswapCoinPublicKey format
  */
 export function hexToPublicKey(hex: string): { bytes: Uint8Array } {

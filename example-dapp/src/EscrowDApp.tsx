@@ -8,7 +8,7 @@ import { ZKConfigProvider } from '@midnight-ntwrk/midnight-js-types';
 import {
   EscrowContractAPI,
   createEscrowAPI,
-  hexToPublicKey,
+  addressToPublicKey, // NEW: Handles Bech32m addresses (mn1...)
   hexToBytes32,
   createCoinInfo,
   TESTNET_CONFIG,
@@ -168,15 +168,10 @@ export default function EscrowDApp() {
         throw new Error('DUST amount must be greater than 0');
       }
 
-      // Validate hex addresses (should be 64 hex chars)
-      if (contributorAddress.replace('0x', '').length !== 64) {
-        throw new Error('Contributor address must be 32 bytes (64 hex characters)');
-      }
-
-      // Prepare escrow parameters
+      // Prepare escrow parameters with proper Midnight address parsing
       const params: CreateEscrowParams = {
-        contributor: hexToPublicKey(contributorAddress),
-        feeAddress: feeAddress ? hexToPublicKey(feeAddress) : hexToPublicKey('0x' + '22'.repeat(32)), // Default fee address
+        contributor: addressToPublicKey(contributorAddress), // Accepts Bech32m (mn1...) or hex
+        feeAddress: feeAddress ? addressToPublicKey(feeAddress) : addressToPublicKey('0x' + '22'.repeat(32)),
         org: orgId ? hexToBytes32(orgId) : hexToBytes32('0x' + '33'.repeat(32)), // Default org ID
         fee: BigInt(fee),
         coin: createCoinInfo(
@@ -328,7 +323,7 @@ export default function EscrowDApp() {
                   type="text"
                   value={contributorAddress}
                   onChange={(e) => setContributorAddress(e.target.value)}
-                  placeholder="0x1111111111111111111111111111111111111111111111111111111111111111"
+                  placeholder="mn1... (Midnight Bech32m address)"
                   required
                   style={{
                     width: '100%',
@@ -339,7 +334,7 @@ export default function EscrowDApp() {
                     borderRadius: '4px',
                   }}
                 />
-                <small>32-byte address (64 hex characters)</small>
+                <small>Midnight address in Bech32m format (starts with 'mn1') or hex</small>
               </div>
 
               <div style={{ marginBottom: '15px' }}>
@@ -366,7 +361,7 @@ export default function EscrowDApp() {
                   type="text"
                   value={feeAddress}
                   onChange={(e) => setFeeAddress(e.target.value)}
-                  placeholder="0x2222222222222222222222222222222222222222222222222222222222222222"
+                  placeholder="mn1... (Midnight Bech32m address)"
                   style={{
                     width: '100%',
                     padding: '8px',
@@ -376,6 +371,7 @@ export default function EscrowDApp() {
                     borderRadius: '4px',
                   }}
                 />
+                <small>Midnight address (optional, defaults to platform fee address)</small>
               </div>
 
               <div style={{ marginBottom: '15px' }}>

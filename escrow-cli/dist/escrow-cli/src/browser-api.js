@@ -3,6 +3,8 @@
  * Designed for use with Lace wallet in web applications
  */
 import { findDeployedContract } from '@midnight-ntwrk/midnight-js-contracts';
+import { parseCoinPublicKeyToHex } from '@midnight-ntwrk/midnight-js-utils';
+import { getZswapNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 // Import the generated contract
 import * as Escrow from '../../contract/src/managed/escrow/contract/index.cjs';
 // Re-export generated types for convenience
@@ -164,6 +166,24 @@ export function hexToBytes32(hex) {
     return bytes;
 }
 /**
+ * Helper to convert a Bech32m address (mn1...) or hex string to ZswapCoinPublicKey format
+ * Midnight uses Bech32m encoding with 'mn' prefix, NOT EVM-style hex addresses!
+ *
+ * @param addressOrHex - Midnight address in Bech32m format (e.g., mn1...) or hex string
+ * @returns ZswapCoinPublicKey object with bytes
+ */
+export function addressToPublicKey(addressOrHex) {
+    try {
+        // Parse using Midnight's utility that handles both Bech32m and hex
+        const hexString = parseCoinPublicKeyToHex(addressOrHex, getZswapNetworkId());
+        return { bytes: hexToBytes32(hexString) };
+    }
+    catch (error) {
+        throw new Error(`Invalid Midnight address or hex: ${error instanceof Error ? error.message : String(error)}`);
+    }
+}
+/**
+ * @deprecated Use addressToPublicKey instead - Midnight uses Bech32m addresses, not raw hex
  * Helper to convert a hex string to ZswapCoinPublicKey format
  */
 export function hexToPublicKey(hex) {
